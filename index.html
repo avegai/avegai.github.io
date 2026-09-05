@@ -1,0 +1,319 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Alejandro Vega — Composer, Sound Designer, Creative Coder</title>
+  <meta name="description" content="Sonic identities for brands, generative soundscapes, and film scores — made in Munich.">
+  <meta property="og:title" content="Alejandro Vega — Turn it up.">
+  <meta property="og:description" content="Sonic identities for brands, generative soundscapes, and film scores — made in Munich.">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://avegai.com/">
+  <!-- PLACEHOLDER: replace with a real 1200x630 image at /assets/og.jpg for link previews -->
+  <meta property="og:image" content="https://avegai.com/assets/og.jpg">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%23101012'/%3E%3Crect x='3' y='3' width='26' height='26' rx='5' fill='none' stroke='%23f3efe6' stroke-opacity='.25' stroke-width='1.5'/%3E%3Ctext x='16' y='20.5' text-anchor='middle' font-family='ui-monospace,monospace' font-size='11' font-weight='600' fill='%23ff5470'%3EAV%3C/text%3E%3C/svg%3E">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@700&family=JetBrains+Mono:wght@400;500;600&family=Work+Sans:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #101012;
+      --ink: #f3efe6;
+      --ink-2: #cfccc6;
+      --ink-3: #a8a49d;
+      --mute: #8f8b86;
+      --mute-2: #6b6864;
+      --rule: rgba(243,239,230,0.12);
+      --rule-2: rgba(243,239,230,0.25);
+      --green: #39ff88;
+      --coral: #ff5470;
+      --yellow: #ffcb47;
+      --pad-x: 80px;
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body { margin: 0; background: var(--bg); color: var(--ink); -webkit-font-smoothing: antialiased; }
+    .disp { font-family: "Unbounded", ui-sans-serif, system-ui, sans-serif; }
+    .mono { font-family: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace; }
+    .body, body { font-family: "Work Sans", ui-sans-serif, system-ui, sans-serif; }
+    a { color: inherit; text-decoration: none; }
+    button { font: inherit; color: inherit; }
+    .lnk { border-bottom: 1px solid rgba(243,239,230,0.3); padding-bottom: 2px; transition: border-color 0.15s; }
+    .lnk:hover { border-color: var(--green); }
+    section, header, footer { padding-left: var(--pad-x); padding-right: var(--pad-x); }
+
+    /* nav */
+    header { display: flex; align-items: center; justify-content: space-between; padding-top: 30px; padding-bottom: 30px; }
+    .brand { display: flex; align-items: center; gap: 12px; }
+    .badge { width: 30px; height: 30px; border-radius: 6px; border: 1.5px solid rgba(243,239,230,0.2); display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 600; color: var(--coral); }
+    .brand-name { font-size: 13px; letter-spacing: 0.04em; }
+    nav { display: flex; align-items: center; gap: 32px; }
+    nav a { font-size: 13px; color: var(--ink-2); }
+    .led { width: 6px; height: 6px; border-radius: 50%; background: var(--green); box-shadow: 0 0 6px var(--green); animation: ledBlink 1.6s ease-in-out infinite; display: inline-block; }
+    .email-lnk { display: inline-flex; align-items: center; gap: 8px; }
+
+    /* hero */
+    .hero { padding-top: 130px; padding-bottom: 110px; display: grid; grid-template-columns: minmax(0, 1fr) 200px; gap: 48px; align-items: end; }
+    .eyebrow { font-size: 13px; color: var(--green); margin-bottom: 36px; }
+    .cursor { display: inline-block; width: 8px; height: 14px; background: var(--green); margin-left: 4px; vertical-align: -2px; animation: blink 1.1s steps(2) infinite; }
+    h1 { font-size: clamp(44px, 7vw, 88px); line-height: 1.0; font-weight: 700; margin: 0 0 40px 0; letter-spacing: -0.02em; }
+    .lede { font-size: 20px; line-height: 1.6; color: var(--ink-2); margin: 0; max-width: 560px; }
+    .knobs { display: flex; gap: 18px; justify-content: center; padding-bottom: 6px; }
+    .knob { display: flex; flex-direction: column; align-items: center; gap: 8px; }
+    .knob button { width: 44px; height: 44px; border-radius: 50%; background: transparent; border: 1.5px solid var(--rule-2); position: relative; cursor: pointer; padding: 0; transition: transform 0.1s; }
+    .knob button:active { transform: scale(0.95); }
+    .knob i { position: absolute; top: 5px; left: 50%; width: 2px; height: 12px; background: var(--green); border-radius: 2px; transform: translateX(-50%) rotate(var(--rot, 0deg)); transform-origin: 50% 16px; transition: transform 0.15s ease-out; }
+    .knob span { font-size: 9px; letter-spacing: 0.08em; color: var(--mute-2); }
+
+    /* clients */
+    .clients { padding-bottom: 110px; display: flex; flex-wrap: wrap; gap: 14px 36px; align-items: center; }
+    .client { display: flex; align-items: center; gap: 10px; font-size: 13px; color: var(--mute); }
+    .jack { width: 12px; height: 12px; border-radius: 50%; border: 2px solid #4a4844; }
+
+    /* featured */
+    .featured > * { min-width: 0; }
+    .featured { padding-top: 96px; padding-bottom: 140px; border-top: 1px solid var(--rule); display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 6fr); gap: 96px; align-items: start; }
+    .label { font-size: 12px; color: var(--mute-2); margin-bottom: 28px; }
+    h2 { font-size: 32px; line-height: 1.2; font-weight: 500; margin: 0 0 24px 0; letter-spacing: -0.01em; }
+    .copy { font-size: 16px; line-height: 1.75; color: var(--ink-3); margin: 0; }
+    .transport { display: flex; align-items: center; gap: 20px; margin-bottom: 28px; }
+    .play { width: 56px; height: 56px; border-radius: 50%; background: var(--green); border: none; display: flex; align-items: center; justify-content: center; cursor: pointer; padding: 0; }
+    .stop { font-size: 13px; color: var(--ink-2); background: transparent; border: none; border-bottom: 1px solid rgba(243,239,230,0.3); padding: 0 0 2px 0; cursor: pointer; min-height: 44px; }
+    .stop:hover { border-color: var(--green); }
+    .scope { width: 100%; height: 56px; overflow: hidden; margin-bottom: 32px; }
+    .scope-track { display: flex; width: 560px; animation: scopeScroll 1.3s linear infinite; animation-play-state: paused; }
+    .scope-track.on { animation-play-state: running; }
+    .scope svg { flex-shrink: 0; }
+    .pads { display: flex; flex-wrap: wrap; gap: 10px; }
+    .pad { font-size: 12px; padding: 0 18px; min-height: 44px; border-radius: 999px; cursor: pointer; background: transparent; color: var(--ink); border: 1px solid var(--rule-2); transition: border-color 0.15s, transform 0.1s, background 0.15s, color 0.15s; }
+    .pad:hover { border-color: var(--green); }
+    .pad:active { transform: translateY(1px); }
+    .pad.on { background: var(--green); color: var(--bg); border-color: var(--green); }
+
+    /* work */
+    .work { padding-top: 96px; padding-bottom: 140px; border-top: 1px solid var(--rule); }
+    .work .label { margin-bottom: 48px; }
+    .row { display: grid; grid-template-columns: 240px minmax(0, 1fr) 90px; gap: 40px; align-items: baseline; padding: 32px 0; border-top: 1px solid var(--rule); }
+    .row:last-child { border-bottom: 1px solid var(--rule); }
+    .meta { font-size: 12px; color: var(--mute-2); line-height: 1.6; }
+    .meta-sep { display: block; height: 0; overflow: hidden; }
+    .title-line { display: flex; align-items: center; gap: 12px; margin-bottom: 8px; }
+    .dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+    .row-title { font-size: 22px; font-weight: 500; transition: color 0.15s; }
+    .row:hover .row-title { color: var(--green); }
+    .row-copy { font-size: 15px; line-height: 1.6; color: var(--ink-3); padding-left: 20px; }
+    .listen { font-size: 12px; color: var(--green); text-align: right; background: none; border: none; padding: 0; cursor: pointer; min-height: 44px; }
+    .listen[hidden] { display: none; }
+
+    /* contact */
+    footer { padding-top: 96px; padding-bottom: 120px; border-top: 1px solid var(--rule); display: flex; justify-content: space-between; align-items: flex-end; gap: 40px; }
+    .big-lnk { font-size: 32px; font-weight: 500; letter-spacing: -0.01em; border-bottom: 2px solid rgba(243,239,230,0.3); padding-bottom: 2px; transition: border-color 0.15s; }
+    .big-lnk:hover { border-color: var(--green); }
+    .social { display: flex; gap: 28px; }
+    .social a { font-size: 13px; color: var(--ink-2); }
+
+    @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
+    @keyframes ledBlink { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
+    @keyframes scopeScroll { from { transform: translateX(0); } to { transform: translateX(-280px); } }
+
+    @media (prefers-reduced-motion: reduce) {
+      .cursor, .led { animation: none; }
+    }
+
+    @media (max-width: 760px) {
+      :root { --pad-x: 24px; }
+      header { padding-top: 22px; padding-bottom: 22px; }
+      .badge { width: 26px; height: 26px; font-size: 9px; }
+      .brand-name { font-size: 12px; }
+      nav { gap: 20px; }
+      nav a { font-size: 12px; }
+      .hero { padding-top: 64px; padding-bottom: 56px; grid-template-columns: minmax(0, 1fr); gap: 40px; align-items: start; }
+      .eyebrow { font-size: 11px; margin-bottom: 24px; }
+      .cursor { width: 7px; height: 12px; }
+      h1 { margin-bottom: 24px; }
+      .lede { font-size: 17px; }
+      .knobs { justify-content: flex-start; gap: 22px; }
+      .clients { padding-bottom: 56px; gap: 12px 22px; }
+      .client { font-size: 11px; gap: 8px; }
+      .jack { width: 10px; height: 10px; }
+      .featured { grid-template-columns: minmax(0, 1fr); gap: 32px; padding-top: 48px; padding-bottom: 64px; }
+      .label { font-size: 11px; margin-bottom: 20px; }
+      h2 { font-size: 24px; margin-bottom: 16px; }
+      .copy { font-size: 15px; line-height: 1.7; }
+      .play { width: 52px; height: 52px; }
+      .scope { height: 48px; margin-bottom: 24px; }
+      .pads { gap: 8px; }
+      .pad { font-size: 11px; padding: 0 16px; }
+      .work { padding-top: 48px; padding-bottom: 64px; }
+      .work .label { margin-bottom: 28px; }
+      .row { grid-template-columns: minmax(0, 1fr); gap: 10px; padding: 24px 0; }
+      .meta { font-size: 11px; }
+      .meta-sep { display: inline; height: auto; }
+      .row-title { font-size: 19px; }
+      .row-copy { font-size: 14px; padding-left: 0; }
+      .listen { text-align: left; }
+      footer { flex-direction: column; align-items: flex-start; padding-top: 48px; padding-bottom: 64px; gap: 32px; }
+      .big-lnk { font-size: 24px; }
+      .social { gap: 24px; }
+      .social a { font-size: 12px; }
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="brand">
+      <div class="badge mono">AV</div>
+      <div class="brand-name mono">ALEJANDRO VEGA</div>
+    </div>
+    <nav class="mono">
+      <a class="lnk" href="#work">Work</a>
+      <!-- PLACEHOLDER: change the address if you'd rather use a different contact email -->
+      <a class="lnk email-lnk" href="mailto:avegaicaza@gmail.com"><span class="led"></span>Email</a>
+    </nav>
+  </header>
+
+  <section class="hero">
+    <div>
+      <div class="eyebrow mono">&gt; composer / sound designer / creative coder<span class="cursor"></span></div>
+      <h1 class="disp">Turn it up.</h1>
+      <p class="lede">Sonic identities for brands, generative soundscapes, and film scores &mdash; made in Munich.</p>
+    </div>
+    <div class="knobs" aria-hidden="true">
+      <div class="knob"><button type="button" data-knob style="--rot: 40deg" aria-label="Warmth"><i></i></button><span class="mono">WARMTH</span></div>
+      <div class="knob"><button type="button" data-knob style="--rot: 160deg" aria-label="Chaos"><i></i></button><span class="mono">CHAOS</span></div>
+      <div class="knob"><button type="button" data-knob style="--rot: 260deg" aria-label="Groove"><i></i></button><span class="mono">GROOVE</span></div>
+    </div>
+  </section>
+
+  <section class="clients mono">
+    <div class="client"><span class="jack"></span>Elica</div>
+    <div class="client"><span class="jack"></span>Vodafone</div>
+    <div class="client"><span class="jack"></span>Mercedes-Benz</div>
+    <div class="client"><span class="jack"></span>Mastercard</div>
+    <div class="client"><span class="jack"></span>Philadelphia</div>
+  </section>
+
+  <section class="featured" id="featured">
+    <div>
+      <div class="label mono">01 &mdash; creative coding</div>
+      <h2>A Nicaraguan marimba, reimagined</h2>
+      <p class="copy">Sampled with Carlos Luis Mej&iacute;a and E&iacute;mor Gonz&aacute;lez, two players from Nicaragua's new generation, and turned into a generative instrument. Patch the pads, then press play.</p>
+    </div>
+
+    <!--
+      PLACEHOLDER — MARIMBA PIECE
+      This block is a visual demo (no sound). Replace everything inside
+      #marimba with your real generative marimba code, or an <iframe>
+      pointing at wherever that piece lives. Keep the outer <div id="marimba">.
+    -->
+    <div id="marimba">
+      <div class="transport">
+        <button type="button" class="play" id="play" aria-label="Play"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 1.5L14 8L3 14.5V1.5Z" fill="#101012"/></svg></button>
+        <button type="button" class="stop mono" id="stop">stop</button>
+      </div>
+      <div class="scope" aria-hidden="true">
+        <div class="scope-track" id="scope">
+          <svg width="280" height="56" viewBox="0 0 280 56"><path d="M0,28 C15,8 35,8 50,28 C65,48 85,48 100,28 C115,8 135,8 150,28 C165,48 185,48 200,28 C215,8 235,8 250,28 C265,48 280,48 280,28" stroke="#39ff88" stroke-width="2" fill="none" stroke-linecap="round"/></svg>
+          <svg width="280" height="56" viewBox="0 0 280 56"><path d="M0,28 C15,8 35,8 50,28 C65,48 85,48 100,28 C115,8 135,8 150,28 C165,48 185,48 200,28 C215,8 235,8 250,28 C265,48 280,48 280,28" stroke="#39ff88" stroke-width="2" fill="none" stroke-linecap="round"/></svg>
+        </div>
+      </div>
+      <div class="pads" id="pads">
+        <button type="button" class="pad mono">arp</button>
+        <button type="button" class="pad mono">perc</button>
+        <button type="button" class="pad mono">fx</button>
+        <button type="button" class="pad mono">sad</button>
+        <button type="button" class="pad mono">maaaya</button>
+        <button type="button" class="pad mono">zapateo</button>
+        <button type="button" class="pad mono">cyc</button>
+        <button type="button" class="pad mono">ping</button>
+      </div>
+    </div>
+  </section>
+
+  <section class="work" id="work">
+    <div class="label mono">02 &mdash; selected work</div>
+
+    <!--
+      PLACEHOLDER — AUDIO CLIPS
+      Each row has an <audio> with a src under /assets/. Drop in a short
+      mp3 (10–20 s is plenty). If the file is missing, the "listen" button
+      hides itself automatically, so nothing looks broken meanwhile.
+      To link a row somewhere (YouTube, Splice, IMDb), set the href on <a class="row">.
+    -->
+    <a class="row" href="#">
+      <div class="meta mono">amp Sound Branding<span class="meta-sep"> &middot; </span>2022&ndash;</div>
+      <div>
+        <div class="title-line"><span class="dot" style="background:#ff5470"></span><span class="row-title">Sonic branding &amp; UX sound</span></div>
+        <div class="row-copy">Sonic logos, UI sounds, and soundscapes for Mastercard, Mercedes-Benz, Vodafone, Elica, and Philadelphia.</div>
+      </div>
+      <button type="button" class="listen mono" data-audio="assets/amp-clip.mp3">listen &rarr;</button>
+    </a>
+
+    <a class="row" href="#">
+      <div class="meta mono">nu.wav &middot; co-founder<span class="meta-sep"> &middot; </span>2020&ndash;</div>
+      <div>
+        <div class="title-line"><span class="dot" style="background:#ffcb47"></span><span class="row-title">Sample packs on Splice</span></div>
+        <div class="row-copy">A NYC-based label I produce, compose, and curate for.</div>
+      </div>
+      <button type="button" class="listen mono" data-audio="assets/nuwav-clip.mp3">listen &rarr;</button>
+    </a>
+
+    <a class="row" href="#">
+      <div class="meta mono">Film &amp; TV<span class="meta-sep"> &middot; </span>2015&ndash;</div>
+      <div>
+        <div class="title-line"><span class="dot" style="background:#39ff88"></span><span class="row-title">Score &amp; sound design</span></div>
+        <div class="row-copy">Music department and sound design work, including Amazon's <em>Good Rivals</em>.</div>
+      </div>
+      <button type="button" class="listen mono" data-audio="assets/film-clip.mp3">listen &rarr;</button>
+    </a>
+  </section>
+
+  <footer id="contact">
+    <div>
+      <div class="label mono" style="margin-bottom:24px">03 &mdash; contact</div>
+      <a class="big-lnk" href="mailto:avegaicaza@gmail.com">Let's make something loud.</a>
+    </div>
+    <div class="social mono">
+      <!-- PLACEHOLDER: put your real profile URLs here -->
+      <a class="lnk" href="https://instagram.com/YOUR_HANDLE" target="_blank" rel="noopener">Instagram</a>
+      <a class="lnk" href="https://linkedin.com/in/YOUR_HANDLE" target="_blank" rel="noopener">LinkedIn</a>
+    </div>
+  </footer>
+
+  <script>
+    // knobs: click to rotate 36° per step
+    document.querySelectorAll('[data-knob]').forEach(function (k) {
+      k.addEventListener('click', function () {
+        var cur = parseFloat(k.style.getPropertyValue('--rot')) || 0;
+        k.style.setProperty('--rot', ((cur + 36) % 360) + 'deg');
+      });
+    });
+
+    // marimba demo: pads toggle, play/stop drives the scope animation
+    var scope = document.getElementById('scope');
+    document.getElementById('play').addEventListener('click', function () { scope.classList.add('on'); });
+    document.getElementById('stop').addEventListener('click', function () { scope.classList.remove('on'); });
+    document.querySelectorAll('#pads .pad').forEach(function (p) {
+      p.addEventListener('click', function () { p.classList.toggle('on'); });
+    });
+
+    // work rows: "listen" plays a clip; hides itself if the file isn't there
+    var current = null;
+    document.querySelectorAll('.listen[data-audio]').forEach(function (btn) {
+      var audio = new Audio();
+      audio.preload = 'metadata';
+      audio.src = btn.getAttribute('data-audio');
+      audio.addEventListener('error', function () { btn.hidden = true; });
+      audio.addEventListener('ended', function () { btn.innerHTML = 'listen &rarr;'; current = null; });
+      btn.addEventListener('click', function (e) {
+        e.preventDefault(); e.stopPropagation();
+        if (current && current !== audio) { current.pause(); current.currentTime = 0; }
+        document.querySelectorAll('.listen').forEach(function (b) { b.innerHTML = 'listen &rarr;'; });
+        if (audio.paused) { audio.play(); btn.innerHTML = 'pause ||'; current = audio; }
+        else { audio.pause(); current = null; }
+      });
+    });
+  </script>
+</body>
+</html>
