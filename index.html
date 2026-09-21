@@ -106,6 +106,18 @@
     .cursor { display: inline-block; width: 8px; height: 14px; background: var(--accent); margin-left: 4px; vertical-align: -2px; animation: blink 1.1s steps(2) infinite; }
     h1 { font-size: clamp(44px, 7vw, 88px); line-height: 1.0; font-weight: 700; margin: 0 0 40px 0; letter-spacing: -0.02em; }
     .lede { font-size: 20px; line-height: 1.6; color: var(--ink-2); margin: 0; max-width: 560px; }
+    .reel { display: flex; align-items: center; gap: 20px; margin-top: 44px; max-width: 560px; }
+    .reel[hidden] { display: none; }
+    .reel-play { width: 48px; height: 48px; min-width: 48px; border-radius: 50%; background: var(--accent); border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; padding: 0; transition: transform 0.12s; }
+    .reel-play:active { transform: scale(0.95); }
+    .reel-play svg path, .reel-play svg rect { fill: var(--play-ink); }
+    .reel-play svg[hidden] { display: none; }
+    .reel-body { flex: 1; min-width: 0; }
+    .reel-label { font-size: 11px; letter-spacing: 0.08em; color: var(--mute-2); margin-bottom: 10px; }
+    .reel-bar { position: relative; height: 22px; display: flex; align-items: center; cursor: pointer; }
+    .reel-bar::after { content: ""; position: absolute; left: 0; right: 0; height: 1px; background: var(--rule-2); }
+    .reel-fill { position: absolute; left: 0; height: 1px; width: 0; background: var(--accent); z-index: 1; transition: width 0.1s linear; }
+    .reel-time { font-size: 11px; color: var(--mute-2); white-space: nowrap; }
     .knobs { display: flex; gap: 18px; justify-content: center; padding-bottom: 6px; }
     .knob { display: flex; flex-direction: column; align-items: center; gap: 8px; }
     .knob button { width: 44px; height: 44px; border-radius: 50%; background: transparent; border: 1.5px solid var(--rule-2); position: relative; cursor: pointer; padding: 0; transition: transform 0.1s; }
@@ -190,6 +202,8 @@
       h1 { margin-bottom: 24px; }
       .lede { font-size: 17px; }
       .knobs { justify-content: flex-start; gap: 22px; }
+      .reel { margin-top: 32px; gap: 16px; }
+      .reel-play { width: 44px; height: 44px; min-width: 44px; }
       .clients { padding-bottom: 56px; gap: 12px 22px; }
       .client { font-size: 11px; gap: 8px; }
       .jack { width: 10px; height: 10px; }
@@ -238,6 +252,19 @@
       <div class="eyebrow mono">&gt; composer / sound designer / creative coder<span class="cursor"></span></div>
       <h1 class="disp">Turn it up.</h1>
       <p class="lede">Sonic identities for brands, generative soundscapes, and film scores &mdash; made in Munich.</p>
+
+      <!-- Appears only once assets/reel.mp3 exists; stays hidden otherwise -->
+      <div class="reel" id="reel" hidden>
+        <button type="button" class="reel-play" id="reel-play" aria-label="Play composer reel">
+          <svg class="i-play" width="14" height="14" viewBox="0 0 16 16" aria-hidden="true"><path d="M3 1.5L14 8L3 14.5V1.5Z"/></svg>
+          <svg class="i-pause" width="14" height="14" viewBox="0 0 16 16" aria-hidden="true" hidden><rect x="3" y="2" width="3.5" height="12"/><rect x="9.5" y="2" width="3.5" height="12"/></svg>
+        </button>
+        <div class="reel-body">
+          <div class="reel-label mono">composer reel</div>
+          <div class="reel-bar" id="reel-bar" role="progressbar" aria-label="Reel progress" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><div class="reel-fill" id="reel-fill"></div></div>
+        </div>
+        <div class="reel-time mono" id="reel-time">0:00</div>
+      </div>
     </div>
     <div class="knobs" aria-hidden="true">
       <div class="knob"><button type="button" data-knob style="--rot: 40deg" aria-label="Warmth"><i></i></button><span class="mono">WARMTH</span></div>
@@ -342,8 +369,6 @@
       <a class="big-lnk" href="mailto:avegaicaza@gmail.com">Let's make something loud.</a>
     </div>
     <div class="social mono">
-      <!-- PLACEHOLDER: put your real Instagram URL here -->
-      <a class="lnk" href="https://instagram.com/YOUR_HANDLE" target="_blank" rel="noopener">Instagram</a>
       <a class="lnk" href="https://www.linkedin.com/in/avegai/" target="_blank" rel="noopener">LinkedIn</a>
     </div>
   </footer>
@@ -359,6 +384,48 @@
         var next = isDark ? 'light' : 'dark';
         root.setAttribute('data-theme', next);
         try { localStorage.setItem('theme', next); } catch (e) {}
+      });
+    })();
+
+    // composer reel: reveals itself only if the audio file is actually present
+    (function () {
+      var el = document.getElementById('reel'), btn = document.getElementById('reel-play');
+      var bar = document.getElementById('reel-bar'), fill = document.getElementById('reel-fill');
+      var time = document.getElementById('reel-time');
+      var iPlay = btn.querySelector('.i-play'), iPause = btn.querySelector('.i-pause');
+      var audio = new Audio();
+      audio.preload = 'metadata';
+      audio.src = 'assets/reel.mp3';
+
+      function fmt(t) {
+        if (!isFinite(t)) return '0:00';
+        var m = Math.floor(t / 60), sec = Math.floor(t % 60);
+        return m + ':' + (sec < 10 ? '0' : '') + sec;
+      }
+      function paint() {
+        var d = audio.duration, pct = (d && isFinite(d)) ? (audio.currentTime / d) * 100 : 0;
+        fill.style.width = pct + '%';
+        time.textContent = fmt(audio.currentTime) + ((d && isFinite(d)) ? ' / ' + fmt(d) : '');
+        bar.setAttribute('aria-valuenow', Math.round(pct));
+      }
+      function icons(playing) {
+        // .hidden is an HTMLElement property; SVG needs the attribute
+        (playing ? iPlay : iPause).setAttribute('hidden', '');
+        (playing ? iPause : iPlay).removeAttribute('hidden');
+        btn.setAttribute('aria-label', (playing ? 'Pause' : 'Play') + ' composer reel');
+      }
+
+      audio.addEventListener('loadedmetadata', function () { el.hidden = false; paint(); });
+      audio.addEventListener('timeupdate', paint);
+      audio.addEventListener('play', function () { icons(true); });
+      audio.addEventListener('pause', function () { icons(false); });
+      audio.addEventListener('ended', function () { audio.currentTime = 0; icons(false); paint(); });
+      audio.addEventListener('error', function () { el.hidden = true; });
+
+      btn.addEventListener('click', function () { audio.paused ? audio.play() : audio.pause(); });
+      bar.addEventListener('click', function (e) {
+        var r = bar.getBoundingClientRect();
+        if (audio.duration && isFinite(audio.duration)) audio.currentTime = ((e.clientX - r.left) / r.width) * audio.duration;
       });
     })();
 
