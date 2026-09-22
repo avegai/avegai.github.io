@@ -34,9 +34,10 @@
       --play-ink: #f4f1ea;
       --led-glow: none;
       --dot-1: #35566b;
-      --dot-2: #6d8697;
-      --dot-3: #9aaab4;
-      --dot-4: #c2ccd2;
+      --dot-2: #637b89;
+      --dot-3: #8d9da5;
+      --dot-4: #afb9bc;
+      --dot-5: #ccd0cf;
       --pad-x: 80px;
     }
     @media (prefers-color-scheme: dark) {
@@ -53,9 +54,10 @@
       --play-ink: #1a1917;
       --led-glow: 0 0 6px #8fb0c4;
       --dot-1: #8fb0c4;
-      --dot-2: #6f8a9c;
-      --dot-3: #566d7d;
-      --dot-4: #41535f;
+      --dot-2: #738c9a;
+      --dot-3: #596b74;
+      --dot-4: #444f55;
+      --dot-5: #33393b;
       }
     }
     :root[data-theme="dark"] {
@@ -71,9 +73,10 @@
       --play-ink: #1a1917;
       --led-glow: 0 0 6px #8fb0c4;
       --dot-1: #8fb0c4;
-      --dot-2: #6f8a9c;
-      --dot-3: #566d7d;
-      --dot-4: #41535f;
+      --dot-2: #738c9a;
+      --dot-3: #596b74;
+      --dot-4: #444f55;
+      --dot-5: #33393b;
     }
     * { box-sizing: border-box; }
     html { scroll-behavior: smooth; }
@@ -148,6 +151,7 @@
     .dot-2 { background: var(--dot-2); }
     .dot-3 { background: var(--dot-3); }
     .dot-4 { background: var(--dot-4); }
+    .dot-5 { background: var(--dot-5); }
     .launch { display: block; border: 1px solid var(--rule); border-radius: 4px; padding: 26px; transition: border-color 0.15s; }
     .launch:hover { border-color: var(--accent); }
     .launch-top { display: flex; align-items: center; gap: 18px; margin-bottom: 26px; }
@@ -353,10 +357,19 @@
       <button type="button" class="listen mono" data-audio="assets/film-clip.mp3">listen &rarr;</button>
     </a>
 
+    <a class="row" href="https://hmtmsoundart.bandcamp.com/album/intakt-iii" target="_blank" rel="noopener">
+      <div class="meta mono">lissa:schu collective<span class="meta-sep"> &middot; </span>Feb 2026</div>
+      <div>
+        <div class="title-line"><span class="dot dot-4"></span><span class="row-title">INTAKT III &mdash; two tracks</span></div>
+        <div class="row-copy">A cassette compilation from the MA Sound Art circle at HMTM Munich &mdash; field recording, noise, live sonification and process pieces. My tracks: <em>MLRE</em> and <em>kria</em>.</div>
+      </div>
+      <span class="listen mono">bandcamp &#8599;</span>
+    </a>
+
     <a class="row" href="https://flamekeepers.metropolisensemble.org/?history=1705839971832" target="_blank" rel="noopener">
       <div class="meta mono">Metropolis Ensemble<span class="meta-sep"> &middot; </span>Jan 2024</div>
       <div>
-        <div class="title-line"><span class="dot dot-4"></span><span class="row-title">Flame Keepers &mdash; guest curator</span></div>
+        <div class="title-line"><span class="dot dot-5"></span><span class="row-title">Flame Keepers &mdash; guest curator</span></div>
         <div class="row-copy">A perpetual live-streamed installation of seven asynchronous loops, reshaped each week by a commissioned artist. I was the Flame Keeper for a week in January 2024.</div>
       </div>
       <span class="listen mono">the stream &#8599;</span>
