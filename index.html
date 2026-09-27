@@ -135,9 +135,21 @@
     .reel-time { font-size: 11px; color: var(--mute-2); white-space: nowrap; }
     .knobs { display: flex; gap: 18px; justify-content: center; padding-bottom: 6px; }
     .knob { display: flex; flex-direction: column; align-items: center; gap: 8px; }
-    .knob button { width: 44px; height: 44px; border-radius: 50%; background: transparent; border: 1.5px solid var(--rule-2); position: relative; cursor: pointer; padding: 0; transition: transform 0.1s; }
-    .knob button:active { transform: scale(0.95); }
-    .knob i { position: absolute; top: 5px; left: 50%; width: 2px; height: 12px; background: var(--accent); border-radius: 2px; transform: translateX(-50%) rotate(var(--rot, 0deg)); transform-origin: 50% 16px; transition: transform 0.15s ease-out; }
+    .knob button { width: 44px; height: 44px; border-radius: 50%; background: transparent; border: 1.5px solid var(--rule-2); position: relative; cursor: ns-resize; padding: 0; touch-action: none; -webkit-user-select: none; user-select: none; transition: border-color 0.15s; }
+    .knob button:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+    .knob button.dragging { border-color: var(--accent); }
+    @supports (mask: radial-gradient(circle, #000 0, #000 1px)) {
+      .knob button::before {
+        content: ""; position: absolute; inset: -6px; border-radius: 50%; pointer-events: none;
+        background: conic-gradient(from 225deg, var(--accent) 0 calc(var(--val, 0.5) * 270deg), transparent calc(var(--val, 0.5) * 270deg));
+        -webkit-mask: radial-gradient(circle, transparent 0 23px, #000 23.5px);
+        mask: radial-gradient(circle, transparent 0 23px, #000 23.5px);
+        opacity: 0.45; transition: opacity 0.15s;
+      }
+      .knob button.dragging::before { opacity: 0.9; }
+    }
+    .knob i { position: absolute; top: 5px; left: 50%; width: 2px; height: 12px; background: var(--accent); border-radius: 2px; transform: translateX(-50%) rotate(calc((var(--val, 0.5) - 0.5) * 270deg)); transform-origin: 50% 16px; transition: transform 0.08s linear; }
+    .knob button.dragging i { transition: none; }
     .knob span { font-size: 9px; letter-spacing: 0.08em; color: var(--mute-2); }
 
     /* clients */
@@ -306,9 +318,9 @@
       </div>
     </div>
     <div class="knobs">
-      <div class="knob"><button type="button" data-knob="warmth" style="--rot: 40deg" aria-label="Warmth" title="Warmth &mdash; tone of the ambient texture"><i></i></button><span class="mono">WARMTH</span></div>
-      <div class="knob"><button type="button" data-knob="chaos" style="--rot: 160deg" aria-label="Chaos" title="Chaos &mdash; density and spread of the ambient texture"><i></i></button><span class="mono">CHAOS</span></div>
-      <div class="knob"><button type="button" data-knob="groove" style="--rot: 260deg" aria-label="Groove" title="Groove &mdash; how pulsed or free the ambient texture is"><i></i></button><span class="mono">GROOVE</span></div>
+      <div class="knob"><button type="button" data-knob="warmth" style="--val: 0.42" role="slider" aria-valuemin="0" aria-valuemax="100" aria-valuenow="42" aria-label="Warmth" title="Warmth &mdash; drive and saturation. Drag up or down."><i></i></button><span class="mono">WARMTH</span></div>
+      <div class="knob"><button type="button" data-knob="chaos" style="--val: 0.38" role="slider" aria-valuemin="0" aria-valuemax="100" aria-valuenow="38" aria-label="Chaos" title="Chaos &mdash; how far the rhythm strays from the written pattern. Drag up or down."><i></i></button><span class="mono">CHAOS</span></div>
+      <div class="knob"><button type="button" data-knob="groove" style="--val: 0.24" role="slider" aria-valuemin="0" aria-valuemax="100" aria-valuenow="24" aria-label="Groove" title="Groove &mdash; builds the arrangement, kick first up to top loops and subdivisions. Drag up or down."><i></i></button><span class="mono">GROOVE</span></div>
     </div>
   </section>
 
@@ -506,13 +518,68 @@
       });
     })();
 
-    // knobs: click to rotate 36° per step
-    document.querySelectorAll('[data-knob]').forEach(function (k) {
-      k.addEventListener('click', function () {
-        var cur = parseFloat(k.style.getPropertyValue('--rot')) || 0;
-        k.style.setProperty('--rot', ((cur + 36) % 360) + 'deg');
+    // knobs: click and drag vertically, like a hardware pot. Nothing else moves them.
+    // Value is 0-1 in the --val custom property; CSS turns that into a 270 degree sweep.
+    (function () {
+      var SWEEP_PX = 150;   // pixels of drag for the full range
+      var FINE = 0.25;      // shift-drag multiplier
+
+      function clamp(v) { return v < 0 ? 0 : v > 1 ? 1 : v; }
+      function get(k) {
+        var v = parseFloat(k.style.getPropertyValue('--val'));
+        return isFinite(v) ? clamp(v) : 0.5;
+      }
+      function set(k, v) {
+        v = clamp(v);
+        k.style.setProperty('--val', v.toFixed(4));
+        k.setAttribute('aria-valuenow', Math.round(v * 100));
+        k.setAttribute('aria-valuetext', Math.round(v * 100) + '%');
+      }
+
+      document.querySelectorAll('[data-knob]').forEach(function (k) {
+        var startY = 0, startVal = 0, pid = null;
+
+        /* While dragging we listen on the window, not on the knob. If the pointer
+           is released off the knob the element never sees the pointerup, the drag
+           stays latched, and every later hover keeps turning it. */
+        function move(e) {
+          if (pid === null || e.pointerId !== pid) return;
+          // belt and braces: no button held means we missed the release
+          if (e.pointerType === 'mouse' && e.buttons === 0) { end(); return; }
+          var d = (startY - e.clientY) / SWEEP_PX;
+          if (e.shiftKey) d *= FINE;
+          set(k, startVal + d);
+          e.preventDefault();
+        }
+
+        function end() {
+          if (pid === null) return;
+          window.removeEventListener('pointermove', move);
+          window.removeEventListener('pointerup', end);
+          window.removeEventListener('pointercancel', end);
+          window.removeEventListener('blur', end);
+          pid = null;
+          k.classList.remove('dragging');
+        }
+
+        k.addEventListener('pointerdown', function (e) {
+          if (e.button !== undefined && e.button !== 0) return;
+          if (pid !== null) end();
+          pid = e.pointerId;
+          startY = e.clientY;
+          startVal = get(k);
+          k.classList.add('dragging');
+          window.addEventListener('pointermove', move);
+          window.addEventListener('pointerup', end);
+          window.addEventListener('pointercancel', end);
+          window.addEventListener('blur', end);
+          e.preventDefault();
+        });
+
+        // a plain click shouldn't jump the value — hardware knobs don't
+        k.addEventListener('click', function (e) { e.preventDefault(); });
       });
-    });
+    })();
 
     // work rows: "listen" plays a clip; hides itself if the file isn't there
     var current = null;
@@ -536,8 +603,9 @@
        No audio files, no libraries — pink noise beds, granular shimmer and
        high-Q resonant pings, all built in the Web Audio API.
 
-       Off by default (browsers block autoplay anyway). WARMTH / CHAOS /
-       GROOVE in the hero are real parameters; scroll position opens the bed.
+       Off by default (browsers block autoplay anyway). The hero knobs are real:
+       WARMTH drives a saturator, CHAOS decides how far the rhythm strays from the
+       written pattern, GROOVE builds the arrangement one layer at a time.
        ------------------------------------------------------------------ */
     (function () {
       var btn = document.getElementById('sound-toggle');
@@ -547,16 +615,40 @@
 
       var RESUME_ON_RETURN = true;  // set false to always start silent, even for returning visitors
       var MASTER = 0.2;             // overall level — deliberately low
+      var BED_LEVEL = 0;            // the continuous noise underlayer — muted; the grains and dust carry the texture
+      var DUST_LEVEL = 1;           // density/presence of the granular crackle
+      var TEX_LEVEL = 1;            // level of the whole textural side (grains, dust, pings) — raise if it feels thin without the bed
 
-      var ctx, master, wet, bed, bedGain, noise;
-      var on = false, grainT = null, pingT = null, ticker = null;
+      var DRIVE_MAX = 34;           // how hard WARMTH can push the saturator
+      var SHAPE_K = 2.6;            // curvature of the tanh
+      var SHAPE_GAIN = SHAPE_K / Math.tanh(SHAPE_K);  // its small-signal gain, compensated out below
+      var MAKEUP = 3.2;             // level the saturator gives back after squashing peaks
+
+      var ctx, master, wet, bed, bedGain, bedBus, texBus, grooveBus, noise, white;
+      var preGain, postGain;        // the WARMTH drive stage
+
+      /* GROOVE is an arrangement control: turn it up and elements arrive in order,
+         kick first, top loops and subdivisions last. Each layer fades in over its
+         own window rather than switching on, so the build is continuous. */
+      function layer(g, lo, hi) { return Math.max(0, Math.min(1, (g - lo) / (hi - lo))); }
+      function layers() {
+        var g = knob('groove');
+        return {
+          kick:  layer(g, 0.06, 0.20),   // sub pulse
+          blip:  layer(g, 0.28, 0.44),   // metallic mid
+          tick:  layer(g, 0.46, 0.62),   // 16th hats
+          sixt:  layer(g, 0.64, 0.80),   // ratcheted subdivisions
+          top:   layer(g, 0.80, 1.00)    // fastest top loop
+        };
+      }
+      var on = false, grainT = null, pingT = null, dustT = null, ticker = null;
       var scrollAmt = 0, duck = 1;
 
       function knob(name) {
         var el = document.querySelector('[data-knob="' + name + '"]');
         if (!el) return 0.5;
-        var deg = parseFloat(el.style.getPropertyValue('--rot')) || 0;
-        return (((deg % 360) + 360) % 360) / 360;
+        var v = parseFloat(el.style.getPropertyValue('--val'));
+        return isFinite(v) ? Math.min(1, Math.max(0, v)) : 0.5;
       }
 
       // pink noise (Paul Kellet's approximation) — the raw material for everything
@@ -579,6 +671,16 @@
         return buf;
       }
 
+      // white noise — pink has almost no energy up at 3-6 kHz, so the brushed
+      // pulse hits need their own flat source or they vanish under the bed
+      function whiteBuffer(sec) {
+        var len = Math.floor(ctx.sampleRate * sec);
+        var buf = ctx.createBuffer(1, len, ctx.sampleRate);
+        var d = buf.getChannelData(0);
+        for (var i = 0; i < len; i++) d[i] = Math.random() * 2 - 1;
+        return buf;
+      }
+
       // synthetic impulse response — decaying noise, cheap and convincing
       function ir(sec, decay) {
         var len = Math.floor(ctx.sampleRate * sec);
@@ -593,10 +695,27 @@
       function build() {
         ctx = new AC();
         noise = pinkBuffer(6);
+        white = whiteBuffer(3);
 
         master = ctx.createGain();
         master.gain.value = 0;
         master.connect(ctx.destination);
+
+        /* WARMTH drive stage: a fixed tanh curve with variable gain into it,
+           the way a real saturator works. 4x oversampling so the harmonics it
+           generates do not alias back down as grit. postGain claws back the
+           level the clipping adds, so the knob changes tone, not volume. */
+        var shaper = ctx.createWaveShaper();
+        var n = 2048, curve = new Float32Array(n), k = SHAPE_K;
+        for (var ci = 0; ci < n; ci++) {
+          var x = (ci * 2) / (n - 1) - 1;
+          curve[ci] = Math.tanh(k * x) / Math.tanh(k);
+        }
+        shaper.curve = curve;
+        shaper.oversample = '4x';
+        preGain = ctx.createGain(); preGain.gain.value = 1;
+        postGain = ctx.createGain(); postGain.gain.value = 1;
+        preGain.connect(shaper); shaper.connect(postGain); postGain.connect(master);
 
         var conv = ctx.createConvolver();
         conv.buffer = ir(3.4, 2.4);
@@ -604,7 +723,17 @@
         verbOut.gain.value = 0.7;
         wet = ctx.createGain();
         wet.gain.value = 0.6;
-        wet.connect(conv); conv.connect(verbOut); verbOut.connect(master);
+        wet.connect(conv); conv.connect(verbOut); verbOut.connect(preGain);
+
+        // texture and rhythm both run at fixed level now; the knobs shape them, not balance them
+        texBus = ctx.createGain(); texBus.gain.value = TEX_LEVEL;
+        texBus.connect(preGain); texBus.connect(wet);
+        grooveBus = ctx.createGain(); grooveBus.gain.value = 1;
+        grooveBus.connect(preGain);
+
+        // the sustained layers sit behind their own bus so the groove can duck them
+        bedBus = ctx.createGain(); bedBus.gain.value = BED_LEVEL;
+        bedBus.connect(texBus);
 
         // bed: slowly drifting band of noise — the "room" everything sits in
         var src = ctx.createBufferSource();
@@ -613,7 +742,7 @@
         bed.type = 'bandpass'; bed.frequency.value = 420; bed.Q.value = 0.9;
         bedGain = ctx.createGain(); bedGain.gain.value = 0.5;
         src.connect(bed); bed.connect(bedGain);
-        bedGain.connect(master); bedGain.connect(wet);
+        bedGain.connect(bedBus);
         src.start();
 
         // two slow LFOs sum into the filter frequency so it never settles
@@ -629,30 +758,31 @@
         var lp = ctx.createBiquadFilter();
         lp.type = 'lowpass'; lp.frequency.value = 190; lp.Q.value = 0.7;
         var subGain = ctx.createGain(); subGain.gain.value = 0.55;
-        sub.connect(lp); lp.connect(subGain); subGain.connect(master);
+        sub.connect(lp); lp.connect(subGain); subGain.connect(bedBus);
         sub.start();
       }
 
-      function out(node, wetAmt) {
+      // texture voices land on texBus, which already feeds the reverb
+      function out(node, spread) {
         var pan = ctx.createStereoPanner ? ctx.createStereoPanner() : null;
         if (pan) {
-          pan.pan.value = (Math.random() * 2 - 1) * wetAmt;
-          node.connect(pan); pan.connect(master); pan.connect(wet);
+          pan.pan.value = (Math.random() * 2 - 1) * spread;
+          node.connect(pan); pan.connect(texBus);
         } else {
-          node.connect(master); node.connect(wet);
+          node.connect(texBus);
         }
       }
 
       // grains: short windowed slices of noise, scattered across the stereo field
       function grain() {
-        var chaos = knob('chaos'), groove = knob('groove'), warmth = knob('warmth');
+        var groove = knob('groove');
         var t = ctx.currentTime;
         var s = ctx.createBufferSource();
         s.buffer = noise;
-        s.playbackRate.value = 0.5 + Math.random() * (0.6 + chaos * 2.2);
+        s.playbackRate.value = 0.5 + Math.random() * 1.7;
         var bp = ctx.createBiquadFilter();
         bp.type = 'bandpass';
-        bp.frequency.value = 600 + Math.random() * (1200 + warmth * 5000) + scrollAmt * 1300;
+        bp.frequency.value = 600 + Math.random() * 3700 + scrollAmt * 1300;
         bp.Q.value = 2 + Math.random() * 9;
         var g = ctx.createGain(); g.gain.value = 0;
         s.connect(bp); bp.connect(g);
@@ -667,43 +797,220 @@
         s.stop(t + dur + 0.1);
 
         // GROOVE pulls the spacing toward a loose pulse; CHAOS packs them closer
-        var base = 0.95 - chaos * 0.65;
+        var base = 0.45;
         var jitter = (1 - groove) * base * 1.5;
         grainT = setTimeout(grain, Math.max(80, (base + Math.random() * jitter) * 1000));
+      }
+
+      /* dust: the grainy layer. Sparse, very short impulses (2-15 ms) rather than
+         a continuous band — this is what makes the texture read as granular
+         crackle instead of flat hiss. CHAOS sets the density. */
+      function dust() {
+        var t = ctx.currentTime;
+        var n = 1 + Math.floor(Math.random() * 3);
+
+        for (var i = 0; i < n; i++) {
+          var at = t + Math.random() * 0.1;
+          var s = ctx.createBufferSource();
+          s.buffer = white;
+          s.playbackRate.value = 0.5 + Math.random() * 1.8;
+          var bp = ctx.createBiquadFilter();
+          bp.type = 'bandpass';
+          bp.frequency.value = 800 + Math.random() * 4800 + scrollAmt * 900;
+          bp.Q.value = 1.2 + Math.random() * 4.5;
+          var g = ctx.createGain();
+          var amp = (0.03 + Math.random() * 0.09) * DUST_LEVEL;
+          var dur = 0.002 + Math.random() * 0.013;
+          g.gain.setValueAtTime(amp, at);
+          g.gain.exponentialRampToValueAtTime(0.0001, at + dur);
+          s.connect(bp); bp.connect(g);
+          out(g, 0.7);
+          s.start(at, Math.random() * (white.duration - 0.05), dur + 0.004);
+          s.stop(at + dur + 0.02);
+        }
+
+        var gap = 0.06;   // steady granular density
+        dustT = setTimeout(dust, Math.max(35, (gap * 0.5 + Math.random() * gap) * 1000));
+      }
+
+      /* sidechain: the continuous bed breathes around the groove. Fast duck,
+         slow exponential recovery — deeper and slower as GROOVE opens up. */
+      function sidechain(at, groove) {
+        if (!bedBus) return;
+        var depth = Math.min(0.8, (0.3 + groove * 0.45) * layers().kick);
+        var release = 0.4 + groove * 0.55;
+        bedBus.gain.setTargetAtTime(BED_LEVEL * (1 - depth), at, 0.015);
+        bedBus.gain.setTargetAtTime(BED_LEVEL, at + 0.07, release);
       }
 
       // pings: noise through a very narrow resonant band — struck-object tones
       var SCALE = [116.5, 155.6, 174.6, 233.1, 261.6, 349.2];
 
       function ping() {
-        var warmth = knob('warmth'), chaos = knob('chaos');
+
         var t = ctx.currentTime;
         var f = SCALE[Math.floor(Math.random() * SCALE.length)]
               * (Math.random() < 0.45 ? 2 : 1)
-              * (1 + (Math.random() - 0.5) * chaos * 0.05);
+              * (1 + (Math.random() - 0.5) * 0.03);
         var s = ctx.createBufferSource(); s.buffer = noise;
         var bp = ctx.createBiquadFilter();
-        bp.type = 'bandpass'; bp.frequency.value = f; bp.Q.value = 26 + warmth * 45;
+        bp.type = 'bandpass'; bp.frequency.value = f; bp.Q.value = 45;
         var g = ctx.createGain(); g.gain.value = 0;
         s.connect(bp); bp.connect(g);
         out(g, 0.55);
 
-        var dur = 2.5 + Math.random() * 3.5 + warmth * 2;
+        var dur = 3.2 + Math.random() * 3.5;
         g.gain.setValueAtTime(0.0001, t);
         g.gain.linearRampToValueAtTime(3.2, t + 0.01);
         g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
         s.start(t, Math.random() * 4, dur + 0.1);
         s.stop(t + dur + 0.2);
 
-        pingT = setTimeout(ping, 3500 + Math.random() * 11000 * (1 - chaos * 0.55));
+        pingT = setTimeout(ping, 3500 + Math.random() * 8000);
+      }
+
+      /* groovebox: GROOVE fades in a small FM rhythm section — sine sub pulses,
+         inharmonic FM ticks and blips, plus ratchets and noise-burst glitches.
+         Deliberately rigid on the grid; GROOVE buys density and glitch, not swing.
+         At 0 it is silent. */
+      var BPM = 104, LOOKAHEAD = 0.15, SCHED_MS = 25, STEPS = 16;
+      var PULSE_LEVEL = 1;  // presence of the GROOVE rhythm — raise or lower to taste
+      var SUB  = [1, 0, 0, 0,  0, 0, 0.7, 0,  0, 0, 0, 0,  0.85, 0, 0, 0];
+      var TICK = [0, 0.35, 0.6, 0.25,  0.5, 0.3, 0.45, 0.7,  0.3, 0.55, 0.4, 0.3,  0.6, 0.35, 0.5, 0.8];
+      var BLIP = [0, 0, 0, 0.5,  0, 0.35, 0, 0,  0.6, 0, 0, 0.4,  0, 0, 0.45, 0];
+      var nextStep = 0, stepIx = 0, pulseT = null;
+
+      // one FM voice: sine carrier, sine modulator at an inharmonic ratio.
+      // The modulation index decays faster than the amplitude, so each hit
+      // starts metallic and collapses to a pure tone — the Raster-Noton click.
+      function fmVoice(at, freq, ratio, index, dur, amp, send, pan) {
+        if (at < ctx.currentTime) at = ctx.currentTime;
+        var car = ctx.createOscillator(); car.frequency.value = freq;
+        var mod = ctx.createOscillator(); mod.frequency.value = freq * ratio;
+        var mg = ctx.createGain();
+        var peak = Math.max(1, freq * index);
+        mg.gain.setValueAtTime(peak, at);
+        mg.gain.exponentialRampToValueAtTime(Math.max(0.5, peak * 0.02), at + dur);
+        mod.connect(mg); mg.connect(car.frequency);
+
+        var g = ctx.createGain();
+        g.gain.setValueAtTime(0.0001, at);
+        g.gain.linearRampToValueAtTime(amp, at + 0.0012);
+        g.gain.exponentialRampToValueAtTime(0.0001, at + dur);
+        car.connect(g);
+
+        if (send > 0) { var s = ctx.createGain(); s.gain.value = send; g.connect(s); s.connect(wet); }
+        var pn = ctx.createStereoPanner ? ctx.createStereoPanner() : null;
+        if (pn) { pn.pan.value = pan; g.connect(pn); pn.connect(grooveBus); } else { g.connect(grooveBus); }
+
+        mod.start(at); car.start(at);
+        mod.stop(at + dur + 0.02); car.stop(at + dur + 0.02);
+      }
+
+      // very short highpassed white burst — the "dropout" artefact
+      function glitchBurst(at, dur, amp) {
+        if (at < ctx.currentTime) at = ctx.currentTime;
+        var s = ctx.createBufferSource(); s.buffer = white;
+        s.playbackRate.value = 0.7 + Math.random() * 1.6;
+        var hp = ctx.createBiquadFilter();
+        hp.type = 'highpass'; hp.frequency.value = 1800 + Math.random() * 4000; hp.Q.value = 0.8;
+        var g = ctx.createGain();
+        g.gain.setValueAtTime(amp, at);
+        g.gain.exponentialRampToValueAtTime(0.0001, at + dur);
+        s.connect(hp); hp.connect(g);
+        var pn = ctx.createStereoPanner ? ctx.createStereoPanner() : null;
+        if (pn) { pn.pan.value = (Math.random() * 2 - 1) * 0.9; g.connect(pn); pn.connect(grooveBus); } else { g.connect(grooveBus); }
+        s.start(at, Math.random() * (white.duration - 0.2), dur + 0.01);
+        s.stop(at + dur + 0.03);
+      }
+
+      /* GROOVE decides WHICH layers are present, CHAOS decides how much they
+         deviate from the written pattern. At CHAOS 0 the sequence is
+         deterministic — every step that has a weight fires, every time. As CHAOS
+         rises it starts skipping written hits, adding unwritten ones off the grid
+         positions, ratcheting, detuning and dropping whole steps out. */
+      function step(t, i, groove, stepDur) {
+        var L = layers(), c = knob('chaos');
+
+        /* Every step gets a firing probability that blends the written weight
+           toward a flat value as CHAOS rises. At 0 you hear the composed pattern;
+           at 1 any step is about as likely as any other, so written hits drop out
+           and unwritten ones appear. Density stays roughly level — what changes is
+           where the hits land, which is the point. */
+        function pStep(w) { return (1 - c) * w + c * 0.38; }
+        // whole-step dropouts, CHAOS's own artefact
+        if (c > 0.5 && Math.random() < (c - 0.5) * 0.14) return;
+
+        if (SUB[i] && L.kick > 0) sidechain(t, groove);
+
+        if (L.kick > 0 && Math.random() < pStep(SUB[i]) * (SUB[i] ? 1 : 0.35)) {
+          fmVoice(t, 46 + Math.random() * 12 * (1 + c), 1, 0.5 + c * 0.6,
+                  0.1 + Math.random() * 0.07,
+                  0.32 * (SUB[i] || 0.6) * L.kick * PULSE_LEVEL, 0, 0);
+        }
+
+        if (L.blip > 0 && Math.random() < pStep(BLIP[i])) {
+          fmVoice(t, 700 + Math.random() * (900 + c * 2400), 2.01 + Math.random() * (1.5 + c * 3.5),
+                  1.1 + Math.random() * (1 + c * 3), 0.03 + Math.random() * 0.06,
+                  0.13 * (BLIP[i] || 0.5) * L.blip * PULSE_LEVEL, 0.22,
+                  (Math.random() * 2 - 1) * 0.5);
+        }
+
+        if (L.tick > 0 && Math.random() < pStep(TICK[i])) {
+          // subdivisions only exist once the sixt layer is in; CHAOS makes them wilder
+          var rat = 1;
+          if (L.sixt > 0 && Math.random() < L.sixt * (0.35 + c * 0.6)) {
+            rat = 2 + Math.floor(Math.random() * (1 + L.sixt * 2 + c * 2));
+          }
+          for (var r = 0; r < rat; r++) {
+            fmVoice(t + r * (stepDur / rat), 2600 + Math.random() * (2400 + c * 3600),
+                    1.41 + Math.random() * (1.2 + c * 2.6), 1.6 + Math.random() * (1.2 + c * 2.4),
+                    0.006 + Math.random() * 0.014,
+                    0.11 * (TICK[i] || 0.45) * L.tick * (rat > 1 ? 0.7 : 1) * PULSE_LEVEL,
+                    0.07, (Math.random() * 2 - 1) * 0.75);
+          }
+        }
+
+        // top loop: the fastest layer, 32nds riding over everything else
+        if (L.top > 0 && Math.random() < L.top * (0.3 + c * 0.5)) {
+          var reps = 2 + Math.floor(Math.random() * (2 + c * 3));
+          for (var q = 0; q < reps; q++) {
+            fmVoice(t + q * (stepDur / reps), 5200 + Math.random() * (2600 + c * 4000),
+                    2.3 + Math.random() * (1 + c * 3), 1.2 + Math.random() * (1 + c * 2),
+                    0.004 + Math.random() * 0.008,
+                    0.055 * L.top * PULSE_LEVEL, 0.05, (Math.random() * 2 - 1) * 0.9);
+          }
+        }
+
+        // glitch artefacts are CHAOS's own, not a layer
+        if (c > 0.3 && Math.random() < (c - 0.3) * 0.22) {
+          glitchBurst(t, 0.008 + Math.random() * 0.03, 0.1 * PULSE_LEVEL);
+        }
+      }
+
+      // lookahead scheduler — setTimeout is far too jittery to place hits directly
+      function pulse() {
+        var groove = knob('groove'), stepDur = 60 / BPM / 4;
+        while (nextStep < ctx.currentTime + LOOKAHEAD) {
+          if (groove > 0.06) step(nextStep, stepIx, groove, stepDur);
+          stepIx = (stepIx + 1) % STEPS;
+          nextStep += stepDur;
+        }
+        pulseT = setTimeout(pulse, SCHED_MS);
       }
 
       // 8 Hz control rate — enough for smooth parameter moves, cheap on battery
       function tick() {
         if (!ctx || !on) return;
         var warmth = knob('warmth'), t = ctx.currentTime;
-        bed.frequency.setTargetAtTime(190 + warmth * 900 + scrollAmt * 750, t, 0.7);
+        bed.frequency.setTargetAtTime(600 + scrollAmt * 750, t, 0.25);
         bedGain.gain.setTargetAtTime(0.34 + (1 - scrollAmt) * 0.3, t, 0.9);
+        // WARMTH: push harder into the tanh and pull the level back out again
+        var drv = 1 + warmth * DRIVE_MAX;
+        preGain.gain.setTargetAtTime(drv, t, 0.12);
+        // undo both the drive and the curve's own gain, then add makeup for the squashed peaks
+        postGain.gain.setTargetAtTime((1 + warmth * MAKEUP) / (drv * SHAPE_GAIN), t, 0.12);
+        if (knob('groove') <= 0.06 && bedBus) bedBus.gain.setTargetAtTime(BED_LEVEL, t, 0.4);
         master.gain.setTargetAtTime(MASTER * duck, t, 0.5);
       }
 
@@ -717,6 +1024,8 @@
         master.gain.setTargetAtTime(MASTER * duck, ctx.currentTime, 1.4);
         if (!grainT) grain();
         if (!pingT) ping();
+        if (!dustT) dust();
+        if (!pulseT) { nextStep = ctx.currentTime + 0.12; stepIx = 0; pulse(); }
         if (!ticker) ticker = setInterval(tick, 125);
         try { localStorage.setItem('ambient', 'on'); } catch (e) {}
       }
@@ -727,6 +1036,8 @@
         btn.setAttribute('aria-label', 'Turn ambient sound on');
         clearTimeout(grainT); grainT = null;
         clearTimeout(pingT); pingT = null;
+        clearTimeout(dustT); dustT = null;
+        clearTimeout(pulseT); pulseT = null;
         clearInterval(ticker); ticker = null;
         if (ctx) {
           master.gain.cancelScheduledValues(ctx.currentTime);
