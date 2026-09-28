@@ -1,0 +1,360 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Calm UI sounds for an investment app — Alejandro Vega</title>
+  <meta name="description" content="Case study: a UX/UI sound system for an investment app, built from the brand's Sonic DNA and tuned with psychoacoustic analysis.">
+  <meta name="theme-color" content="#f4f1ea" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#1a1917" media="(prefers-color-scheme: dark)">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%23f4f1ea'/%3E%3Crect x='3' y='3' width='26' height='26' rx='5' fill='none' stroke='%2323211d' stroke-opacity='.25' stroke-width='1.5'/%3E%3Ctext x='16' y='20.5' text-anchor='middle' font-family='ui-monospace,monospace' font-size='11' font-weight='600' fill='%2335566b'%3EAV%3C/text%3E%3C/svg%3E">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@700&family=JetBrains+Mono:wght@400;500;600&family=Work+Sans:wght@400;500&display=swap" rel="stylesheet">
+  <script>
+    try { var t = localStorage.getItem('theme'); if (t) document.documentElement.setAttribute('data-theme', t); } catch (e) {}
+  </script>
+  <!--
+    EDITING
+    - Sounds live in ./audio/. To swap one, replace the file with the same name.
+    - Measurements: fill sharpness / roughness in the SOUNDS list at the bottom,
+      or delete the "measuring calm" table if you'd rather not show numbers.
+    - Rewrite each sound's "intent" so it says what you actually designed for.
+  -->
+  <style>
+    :root {
+      --bg: #f4f1ea; --ink: #23211d; --ink-2: #4a463f; --ink-3: #6e6960;
+      --mute: #8b867c; --mute-2: #a09a8f;
+      --rule: rgba(35,33,29,0.13); --rule-2: rgba(35,33,29,0.22);
+      --accent: #35566b; --led-glow: none;
+      --frame: #e2ddd2; --screen: #ebe7de; --sheet: #faf8f3;
+      --pad-x: 80px;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root:not([data-theme="light"]) {
+        --bg: #1a1917; --ink: #e9e5dc; --ink-2: #bdb8ad; --ink-3: #979288;
+        --mute: #7d786f; --mute-2: #635f58;
+        --rule: rgba(233,229,220,0.13); --rule-2: rgba(233,229,220,0.22);
+        --accent: #8fb0c4; --led-glow: 0 0 6px #8fb0c4;
+        --frame: #141311; --screen: #22211e; --sheet: #2c2b27;
+      }
+    }
+    :root[data-theme="dark"] {
+      --bg: #1a1917; --ink: #e9e5dc; --ink-2: #bdb8ad; --ink-3: #979288;
+      --mute: #7d786f; --mute-2: #635f58;
+      --rule: rgba(233,229,220,0.13); --rule-2: rgba(233,229,220,0.22);
+      --accent: #8fb0c4; --led-glow: 0 0 6px #8fb0c4;
+      --frame: #141311; --screen: #22211e; --sheet: #2c2b27;
+    }
+
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--bg); color: var(--ink); -webkit-font-smoothing: antialiased; transition: background-color 0.25s ease, color 0.25s ease; font-family: "Work Sans", ui-sans-serif, system-ui, sans-serif; }
+    .disp { font-family: "Unbounded", ui-sans-serif, system-ui, sans-serif; }
+    .mono { font-family: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace; }
+    a { color: inherit; text-decoration: none; }
+    button { font: inherit; color: inherit; }
+    :focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; border-radius: 2px; }
+    .lnk { border-bottom: 1px solid var(--rule-2); padding-bottom: 2px; transition: border-color 0.15s; }
+    .lnk:hover { border-color: var(--accent); }
+    header, section, footer { padding-left: var(--pad-x); padding-right: var(--pad-x); }
+
+    header { display: flex; align-items: center; justify-content: space-between; padding-top: 30px; padding-bottom: 30px; }
+    .brand { display: flex; align-items: center; gap: 12px; }
+    .badge { width: 30px; height: 30px; border-radius: 6px; border: 1.5px solid var(--rule-2); display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 600; color: var(--accent); }
+    .brand-name { font-size: 13px; letter-spacing: 0.04em; }
+    nav { display: flex; align-items: center; gap: 28px; font-size: 13px; color: var(--ink-2); }
+    .theme-toggle { background: none; border: none; padding: 0; cursor: pointer; color: var(--ink-2); display: inline-flex; align-items: center; min-height: 44px; }
+    .theme-toggle:hover { color: var(--accent); }
+
+    .hero { padding-top: 110px; padding-bottom: 72px; }
+    .eyebrow { font-size: 13px; color: var(--accent); margin-bottom: 32px; }
+    h1 { font-size: clamp(34px, 5vw, 60px); line-height: 1.04; font-weight: 700; margin: 0 0 32px; letter-spacing: -0.02em; max-width: 15ch; }
+    .lede { font-size: 20px; line-height: 1.6; color: var(--ink-2); margin: 0; max-width: 580px; }
+    .facts { display: flex; flex-wrap: wrap; gap: 20px 56px; margin-top: 48px; }
+    .fact-label { font-size: 12px; color: var(--mute-2); margin-bottom: 6px; }
+    .fact-body { font-size: 15px; color: var(--ink-2); }
+
+    .label { font-size: 12px; color: var(--mute-2); margin-bottom: 36px; }
+
+    /* demo */
+    .demo { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 72px; align-items: start; padding-top: 48px; padding-bottom: 96px; border-top: 1px solid var(--rule); }
+    .phone { width: 280px; aspect-ratio: 9 / 18.5; border: 1px solid var(--rule-2); border-radius: 40px; padding: 10px; background: var(--frame); }
+    .screen { position: relative; display: block; width: 100%; height: 100%; border: 0; padding: 0; border-radius: 31px; background: var(--screen); overflow: hidden; cursor: pointer; text-align: left; color: var(--ink); }
+    .app { padding: 44px 22px 22px; height: 100%; display: flex; flex-direction: column; }
+    .app-top { display: flex; justify-content: space-between; font-size: 12px; color: var(--ink-3); }
+    .value { font-size: 28px; font-weight: 500; letter-spacing: -0.01em; margin-top: 18px; font-variant-numeric: tabular-nums; }
+    .delta { font-size: 13px; color: var(--ink-3); font-variant-numeric: tabular-nums; }
+    .spark { margin-top: 24px; width: 100%; height: 90px; }
+    .spark polyline { fill: none; stroke: var(--mute); stroke-width: 1.5; }
+    .app-btn { margin-top: auto; border: 1px solid var(--rule-2); border-radius: 999px; padding: 12px; text-align: center; font-size: 14px; font-weight: 500; }
+    .sheet, .banner { position: absolute; left: 10px; right: 10px; background: var(--sheet); border: 1px solid var(--rule); }
+    .sheet { bottom: 10px; border-radius: 22px; padding: 20px; }
+    .banner { top: 10px; border-radius: 18px; padding: 14px 16px; }
+    .sheet strong, .banner strong { display: block; font-size: 14px; font-weight: 500; margin-bottom: 4px; }
+    .sheet span, .banner span { display: block; font-size: 13px; color: var(--ink-3); line-height: 1.45; }
+    .sheet .app-btn { margin-top: 14px; }
+
+    .console { min-width: 0; }
+    .readout { display: flex; align-items: center; gap: 12px; font-size: 13px; color: var(--ink-2); min-height: 20px; }
+    .led { width: 6px; height: 6px; border-radius: 50%; background: var(--rule-2); flex: none; }
+    .led.on { background: var(--accent); box-shadow: var(--led-glow); }
+    .scope { display: block; width: 100%; height: 88px; margin: 16px 0 32px; border-top: 1px solid var(--rule); border-bottom: 1px solid var(--rule); }
+
+    .rows { list-style: none; margin: 0; padding: 0; }
+    .row { width: 100%; display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 6px 24px; align-items: baseline; padding: 22px 0; border: 0; border-top: 1px solid var(--rule); background: none; text-align: left; cursor: pointer; }
+    .rows li:last-child .row { border-bottom: 1px solid var(--rule); }
+    .row-title { font-size: 20px; font-weight: 500; transition: color 0.15s; }
+    .row:hover .row-title, .row[aria-pressed="true"] .row-title { color: var(--accent); }
+    .row-copy { grid-column: 1; font-size: 15px; color: var(--ink-3); }
+    .play { grid-row: 1; grid-column: 2; font-size: 12px; color: var(--accent); white-space: nowrap; }
+    .intent { margin: 24px 0 0; font-size: 16px; line-height: 1.6; color: var(--ink-2); max-width: 520px; min-height: 3.4em; }
+
+    /* story */
+    .story { padding-bottom: 40px; }
+    .chapter { display: grid; grid-template-columns: 240px minmax(0, 1fr); gap: 40px; padding: 40px 0; border-top: 1px solid var(--rule); }
+    .chapter .label { margin: 4px 0 0; }
+    .chapter p { font-size: 17px; line-height: 1.7; color: var(--ink-2); margin: 0 0 14px; max-width: 620px; }
+    table { width: 100%; max-width: 620px; border-collapse: collapse; margin-top: 16px; font-size: 14px; font-variant-numeric: tabular-nums; }
+    th, td { text-align: left; padding: 12px 8px 12px 0; border-bottom: 1px solid var(--rule); }
+    th { font-weight: 400; font-size: 12px; color: var(--mute-2); }
+    td + td, th + th { text-align: right; }
+    caption { caption-side: bottom; text-align: left; font-size: 12px; color: var(--mute-2); padding-top: 12px; }
+
+    footer { padding-top: 40px; padding-bottom: 60px; border-top: 1px solid var(--rule); font-size: 13px; color: var(--ink-2); }
+    .sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+
+    @media (max-width: 900px) {
+      :root { --pad-x: 24px; }
+      .hero { padding-top: 64px; padding-bottom: 48px; }
+      .demo { grid-template-columns: 1fr; gap: 48px; }
+      .phone { margin: 0 auto; width: min(280px, 80vw); }
+      .chapter { grid-template-columns: 1fr; gap: 12px; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      body { transition: none; }
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <a class="brand" href="/">
+      <span class="badge mono">AV</span>
+      <span class="brand-name mono">Alejandro Vega</span>
+    </a>
+    <nav class="mono">
+      <a class="lnk" href="/#work">back to work</a>
+      <button class="theme-toggle" id="theme-toggle" type="button" aria-label="Switch light or dark theme">
+        <svg width="18" height="18" viewBox="0 0 18 18" aria-hidden="true"><circle cx="9" cy="9" r="7" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M9 2a7 7 0 0 1 0 14z" fill="currentColor"/></svg>
+      </button>
+    </nav>
+  </header>
+
+  <section class="hero">
+    <div class="eyebrow mono">case study / UX sound</div>
+    <h1 class="disp">Calm UI sounds for an investment app</h1>
+    <p class="lede">A UX/UI sound system built from the brand's Sonic DNA and tuned with psychoacoustic analysis, so the interface stays calm at the moments people are most anxious about their money.</p>
+    <div class="facts">
+      <div><div class="fact-label mono">client</div><div class="fact-body">Investment app, name under NDA</div></div>
+      <div><div class="fact-label mono">studio</div><div class="fact-body">amp Sound Branding</div></div>
+      <div><div class="fact-label mono">role</div><div class="fact-body">Sound design, psychoacoustic analysis</div></div>
+    </div>
+  </section>
+
+  <section class="demo" aria-label="Interactive demo">
+    <div class="phone">
+      <button class="screen" id="screen" type="button" aria-label="Replay the current sound"></button>
+    </div>
+    <div class="console">
+      <div class="label mono">tap a moment to hear it</div>
+      <div class="readout mono"><span class="led" id="led"></span><span id="status">ready</span></div>
+      <canvas class="scope" id="scope" aria-hidden="true"></canvas>
+      <ul class="rows" id="rows"></ul>
+      <p class="intent" id="intent"></p>
+      <p class="sr" aria-live="polite" id="live"></p>
+    </div>
+  </section>
+
+  <section class="story">
+    <div class="chapter">
+      <div class="label mono">the problem</div>
+      <div><p>People open an investment app at tense moments: after a market drop, before a large order, when an alert arrives. Most interface sounds are built to grab attention, bright and sharp and urgent. Here the brief was the opposite. Every sound had to help people stay calm.</p></div>
+    </div>
+    <div class="chapter">
+      <div class="label mono">built from the brand</div>
+      <div><p>None of the sounds are stock. Each one is derived from the brand's Sonic DNA track, its motif, timbre and harmony, so the app sounds like the same brand as everything else it puts into the world.</p></div>
+    </div>
+    <div class="chapter">
+      <div class="label mono">measuring calm</div>
+      <div>
+        <p>Taste isn't enough when the goal is how a sound makes someone feel. I analysed every candidate sound in Python for sharpness and roughness, two qualities strongly linked to sounds feeling harsh or stressful, and used the results to guide revisions and to explain choices to the client with data rather than opinion.</p>
+        <table>
+          <caption>Sharpness after DIN 45692, roughness after Daniel &amp; Weber.</caption>
+          <thead><tr><th scope="col">sound</th><th scope="col">sharpness (acum)</th><th scope="col">roughness (asper)</th></tr></thead>
+          <tbody id="metrics"></tbody>
+        </table>
+      </div>
+    </div>
+    <div class="chapter">
+      <div class="label mono">what I learned</div>
+      <div><p>Testing early beats defending taste later. Putting sounds in front of listeners and measurements early gave the client something concrete to react to, and shortened sign-off.</p></div>
+    </div>
+  </section>
+
+  <footer class="mono"><a class="lnk" href="/#work">back to work</a></footer>
+
+<script>
+/* ============================================================
+   EDIT HERE — rewrite each "intent" to match what you designed,
+   and fill sharpness / roughness with your measured values.
+   ============================================================ */
+const SOUNDS = [
+  { id: "confirm", name: "Order placed", when: "After a trade is confirmed", src: "audio/success.mp3",
+    intent: "Confirms without celebrating. A trade is a decision, not a reward, so the sound resolves gently instead of cheering.",
+    sharpness: null, roughness: null },
+  { id: "alert", name: "Price alert", when: "When a watched stock moves", src: "audio/price_alert.mp3",
+    intent: "Noticeable but unhurried, so an alert invites a look rather than demanding one.",
+    sharpness: null, roughness: null },
+  { id: "down", name: "Portfolio down", when: "When the day's value drops", src: "audio/portfolioDown.mp3",
+    intent: "A loss is information, not an error. It settles rather than warns.",
+    sharpness: null, roughness: null },
+  { id: "error", name: "Something went wrong", when: "When an order fails", src: "audio/error.mp3",
+    intent: "The quietest sound in the set. Clear enough to register, soft enough not to add stress to a moment that is already frustrating.",
+    sharpness: null, roughness: null }
+];
+
+/* ---------- screens ---------- */
+const sparkUp = '<svg class="spark" viewBox="0 0 240 90" preserveAspectRatio="none" aria-hidden="true"><polyline points="0,70 30,62 60,66 90,50 120,54 150,40 180,44 210,28 240,24"/></svg>';
+const sparkDown = '<svg class="spark" viewBox="0 0 240 90" preserveAspectRatio="none" aria-hidden="true"><polyline points="0,26 30,30 60,24 90,38 120,36 150,50 180,48 210,60 240,64"/></svg>';
+const home = (v, d, s) => '<div class="app"><div class="app-top"><span>Portfolio</span><span>Today</span></div><div class="value">' + v + '</div><div class="delta">' + d + '</div>' + s + '<div class="app-btn">Buy</div></div>';
+const base = home("€12,480.20", "+0.4% today", sparkUp);
+const SCREENS = {
+  idle: base,
+  confirm: base + '<div class="sheet"><strong>Order placed</strong><span>Your order for 10 shares has been sent.</span></div>',
+  alert: '<div class="banner"><strong>Price alert</strong><span>A stock on your watchlist is up 3% today.</span></div>' + base,
+  down: home("€12,218.64", "−2.1% today", sparkDown),
+  error: base + '<div class="sheet"><strong>Order didn\'t go through</strong><span>Check your connection and try again.</span><div class="app-btn">Try again</div></div>'
+};
+
+/* ---------- audio ---------- */
+let ac, analyser;
+const buffers = {};
+function ensureAudio() {
+  if (!ac) {
+    ac = new (window.AudioContext || window.webkitAudioContext)();
+    analyser = ac.createAnalyser();
+    analyser.fftSize = 2048;
+    analyser.connect(ac.destination);
+  }
+  if (ac.state === "suspended") ac.resume();
+}
+async function playFile(src) {
+  if (!buffers[src]) {
+    const res = await fetch(src);
+    if (!res.ok) throw new Error(res.status);
+    buffers[src] = await ac.decodeAudioData(await res.arrayBuffer());
+  }
+  const s = ac.createBufferSource();
+  s.buffer = buffers[src];
+  s.connect(analyser);
+  s.start();
+  return buffers[src].duration;
+}
+
+/* ---------- scope ---------- */
+const canvas = document.getElementById("scope");
+const g = canvas.getContext("2d");
+let wave, running = false, stopAt = 0, colors = {};
+function readColors() {
+  const cs = getComputedStyle(document.documentElement);
+  colors = { accent: cs.getPropertyValue("--accent").trim(), rule: cs.getPropertyValue("--rule-2").trim() };
+}
+function sizeCanvas() {
+  const dpr = window.devicePixelRatio || 1;
+  canvas.width = canvas.clientWidth * dpr;
+  canvas.height = canvas.clientHeight * dpr;
+  g.setTransform(dpr, 0, 0, dpr, 0, 0);
+  readColors();
+  draw(true);
+}
+function draw(once) {
+  const w = canvas.clientWidth, h = canvas.clientHeight;
+  g.clearRect(0, 0, w, h);
+  g.lineWidth = 1.5;
+  g.beginPath();
+  if (analyser && running) {
+    if (!wave) wave = new Float32Array(analyser.fftSize);
+    analyser.getFloatTimeDomainData(wave);
+    g.strokeStyle = colors.accent;
+    const step = wave.length / w;
+    for (let x = 0; x < w; x++) {
+      const y = h / 2 - wave[Math.floor(x * step)] * h * 1.8;
+      x ? g.lineTo(x, y) : g.moveTo(x, y);
+    }
+  } else {
+    g.strokeStyle = colors.rule;
+    g.moveTo(0, h / 2); g.lineTo(w, h / 2);
+  }
+  g.stroke();
+  if (!once && running) {
+    if (performance.now() < stopAt) requestAnimationFrame(() => draw());
+    else { running = false; led.classList.remove("on"); draw(true); }
+  }
+}
+
+/* ---------- ui ---------- */
+const rowsEl = document.getElementById("rows"), screenEl = document.getElementById("screen");
+const statusEl = document.getElementById("status"), intentEl = document.getElementById("intent");
+const liveEl = document.getElementById("live"), led = document.getElementById("led");
+let current = null;
+
+SOUNDS.forEach(s => {
+  const li = document.createElement("li");
+  li.innerHTML = '<button class="row" type="button" aria-pressed="false" data-id="' + s.id + '">' +
+    '<span class="row-title">' + s.name + '</span><span class="play mono">play</span>' +
+    '<span class="row-copy">' + s.when + '</span></button>';
+  rowsEl.appendChild(li);
+});
+document.getElementById("metrics").innerHTML = SOUNDS.map(s => {
+  const f = v => (v == null ? "—" : Number(v).toFixed(2));
+  return '<tr><td>' + s.name + '</td><td>' + f(s.sharpness) + '</td><td>' + f(s.roughness) + '</td></tr>';
+}).join("");
+
+async function play(id) {
+  ensureAudio();
+  const s = SOUNDS.find(x => x.id === id);
+  current = id;
+  rowsEl.querySelectorAll(".row").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.id === id)));
+  screenEl.innerHTML = SCREENS[id];
+  statusEl.textContent = s.name.toLowerCase();
+  intentEl.textContent = s.intent;
+  liveEl.textContent = "Playing " + s.name;
+  let dur;
+  try { dur = await playFile(s.src); }
+  catch (e) { statusEl.textContent = "couldn't load " + s.src; return; }
+  readColors();
+  led.classList.add("on");
+  stopAt = performance.now() + dur * 1000 + 200;
+  if (!running) { running = true; draw(); }
+}
+rowsEl.addEventListener("click", e => { const b = e.target.closest(".row"); if (b) play(b.dataset.id); });
+screenEl.addEventListener("click", () => play(current || SOUNDS[0].id));
+
+/* theme toggle — same key as the homepage, so the choice carries across */
+document.getElementById("theme-toggle").addEventListener("click", () => {
+  const root = document.documentElement;
+  const explicit = root.getAttribute("data-theme");
+  const isDark = explicit ? explicit === "dark" : window.matchMedia("(prefers-color-scheme: dark)").matches;
+  const next = isDark ? "light" : "dark";
+  root.setAttribute("data-theme", next);
+  try { localStorage.setItem("theme", next); } catch (e) {}
+  readColors(); draw(true);
+});
+window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", () => { readColors(); draw(true); });
+
+screenEl.innerHTML = SCREENS.idle;
+window.addEventListener("resize", sizeCanvas);
+sizeCanvas();
+</script>
+</body>
+</html>
