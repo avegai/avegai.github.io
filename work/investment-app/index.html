@@ -188,11 +188,6 @@
       <div class="label mono">measuring calm</div>
       <div>
         <p>Taste isn't enough when the goal is how a sound makes someone feel. I analysed every candidate sound in Python for sharpness and roughness, two qualities strongly linked to sounds feeling harsh or stressful, and used the results to guide revisions and to explain choices to the client with data rather than opinion.</p>
-        <table>
-          <caption>Sharpness after DIN 45692, roughness after Daniel &amp; Weber.</caption>
-          <thead><tr><th scope="col">sound</th><th scope="col">sharpness (acum)</th><th scope="col">roughness (asper)</th></tr></thead>
-          <tbody id="metrics"></tbody>
-        </table>
       </div>
     </div>
     <div class="chapter">
@@ -315,10 +310,6 @@ SOUNDS.forEach(s => {
     '<span class="row-copy">' + s.when + '</span></button>';
   rowsEl.appendChild(li);
 });
-document.getElementById("metrics").innerHTML = SOUNDS.map(s => {
-  const f = v => (v == null ? "—" : Number(v).toFixed(2));
-  return '<tr><td>' + s.name + '</td><td>' + f(s.sharpness) + '</td><td>' + f(s.roughness) + '</td></tr>';
-}).join("");
 
 async function play(id) {
   ensureAudio();
