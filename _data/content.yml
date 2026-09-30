@@ -1,0 +1,131 @@
+# All the words on avegai.com live in this file.
+# Easiest way to edit: https://app.pagescms.org (sign in with GitHub, pick this repo).
+# Editing here on GitHub works too: keep the indentation, and keep text inside "quotes".
+# Changes go live about a minute after you save.
+
+# ---- Browser tab, Google and link previews ----
+page_title: "Alejandro Vega — Composer, Sound Designer, Creative Coder"
+share_title: "Alejandro Vega — Sound Designer"
+description: "Sonic identities for brands, generative soundscapes, and film scores. Based in Munich."
+
+# ---- Top of the page ----
+headline: "Sonic identities for brands, generative soundscapes, and film scores."
+reel_label: "composer reel"
+reel_audio: "/assets/reel.mp3"
+clients:
+  - "Elica"
+  - "Vodafone"
+  - "Mercedes-Benz"
+  - "Mastercard"
+  - "Philadelphia"
+
+# ---- Menu ----
+menu_note: "Composer and sound designer in Munich. Sonic identity, interaction sound and score."
+
+# ---- About ----
+about_lead: "Ten-plus years turning client briefs into interactive audio and haptic experiences."
+about:
+  - "I work alongside creative teams, research where an experience actually breaks down for users, and turn those findings into both better sound design and the strategy around a release; a client advisor rather than an executor of briefs."
+  - "Currently designing UX/UI sound and haptic feedback at amp Sound Branding in Munich, and running the nu.wav label."
+
+# ---- Disciplines ----
+disciplines:
+  - name: "Sonic branding"
+    description: "Sonic logos, brand themes and the soundscapes that carry them."
+    loop: "/assets/loops/branding.mp3"
+  - name: "UX/UI sound & haptics"
+    description: "Interaction sound and haptic feedback, designed from where users actually struggle."
+    loop: "/assets/loops/ux.mp3"
+  - name: "Score & film"
+    description: "Music and sound design for picture."
+    loop: "/assets/loops/score.mp3"
+  - name: "Sample packs & presets"
+    description: "Produced, composed and curated for nu.wav, released through Splice."
+    loop: "/assets/loops/packs.mp3"
+  - name: "Creative coding & sound art"
+    description: "Generative systems and playable instruments for the browser."
+    loop: "/assets/loops/code.mp3"
+
+# ---- Work ----
+# categories can be: branding, ux, score, packs, art, code
+# pattern (the little drawing) can be: bands, dots, bars, grains, wave, spectro, rings
+work:
+  - title: "Sonic branding & UX sound"
+    year: "2022—"
+    client: "amp Sound Branding"
+    description: "Sonic logos, UI sounds and soundscapes for Mastercard, Mercedes-Benz, Vodafone, Elica and Philadelphia."
+    categories: ["branding", "ux"]
+    link: ""
+    video: "https://youtu.be/gma4OWaAMCw"
+    video_label: "demo reel"
+    audio: "/assets/work/amp.mp3"
+    pattern: "bands"
+  - title: "Calm UI sounds for an investment app"
+    year: ""
+    client: "Personal work, case study"
+    description: "Four app moments, each sound designed to keep people calm under financial stress."
+    categories: ["ux"]
+    link: "/work/investment-app/"
+    video: ""
+    video_label: ""
+    audio: "/assets/work/investment-app.mp3"
+    pattern: "dots"
+  - title: "A Nicaraguan marimba, reimagined"
+    year: ""
+    client: "The HTML Review, issue 04"
+    description: "Sampled with Carlos Luis Mejía and Evenor González and built into a playable browser instrument."
+    categories: ["code", "art"]
+    link: "https://thehtml.review/04/nica-marimba/"
+    video: ""
+    video_label: ""
+    audio: "/assets/work/marimba.mp3"
+    pattern: "bars"
+  - title: "Sample packs & sound design"
+    year: "2020—"
+    client: "nu.wav, co-founder"
+    description: "A NYC-based label I produce, compose and curate for. Packs released through Splice."
+    categories: ["packs"]
+    link: "https://nuwavlab.com"
+    video: ""
+    video_label: ""
+    audio: "/assets/work/nuwav.mp3"
+    pattern: "grains"
+  - title: "Score & sound design"
+    year: "2015—"
+    client: "Film & TV"
+    description: "Music department and sound design work, including Amazon’s Good Rivals."
+    categories: ["score"]
+    link: ""
+    video: ""
+    video_label: ""
+    audio: "/assets/work/film.mp3"
+    pattern: "wave"
+  - title: "INTAKT III — two tracks"
+    year: "Feb 2026"
+    client: "lissa:schu collective"
+    description: "A cassette compilation from the MA Sound Art programme at HMTM Munich. My tracks: MLRE and kria."
+    categories: ["art"]
+    link: "https://hmtmsoundart.bandcamp.com/album/intakt-iii"
+    video: ""
+    video_label: ""
+    audio: "/assets/work/intakt.mp3"
+    pattern: "spectro"
+  - title: "Flame Keepers — guest curator"
+    year: "Jan 2024"
+    client: "Metropolis Ensemble"
+    description: "A perpetual live-streamed installation of seven asynchronous loops, reshaped each week by a commissioned artist."
+    categories: ["art", "code"]
+    link: "https://flamekeepers.metropolisensemble.org/?history=1705839971832"
+    video: ""
+    video_label: ""
+    audio: "/assets/work/flame-keepers.mp3"
+    pattern: "rings"
+
+# ---- Contact ----
+contact_line: "Let's make something loud."
+email: "avegaicaza@gmail.com"
+links:
+  - label: "LinkedIn"
+    url: "https://www.linkedin.com/in/avegai/"
+  - label: "nu.wav"
+    url: "https://nuwavlab.com"
