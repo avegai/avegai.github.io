@@ -75,13 +75,19 @@
     .overlay {
       position: fixed; inset: 0; z-index: 50; background: var(--bg);
       padding: 120px var(--pad-x) 56px; display: flex; flex-direction: column; justify-content: space-between;
-      opacity: 0; visibility: hidden; transition: opacity .3s, visibility .3s;
+      align-items: flex-end; text-align: right;
+      transform: translateX(100%); visibility: hidden;
+      transition: transform .42s cubic-bezier(.6,0,.2,1), visibility 0s .42s;
     }
-    body.menu-open .overlay { opacity: 1; visibility: visible; }
-    .overlay nav { display: flex; flex-direction: column; align-items: flex-start; gap: 2px; }
+    body.menu-open .overlay { transform: none; visibility: visible; transition: transform .42s cubic-bezier(.6,0,.2,1), visibility 0s; }
+    @media (prefers-reduced-motion: reduce) {
+      .overlay, body.menu-open .overlay { transform: none; opacity: 0; transition: opacity .2s, visibility 0s .2s; }
+      body.menu-open .overlay { opacity: 1; transition: opacity .2s, visibility 0s; }
+    }
+    .overlay nav { display: flex; flex-direction: column; align-items: flex-end; gap: 2px; }
     .overlay nav a {
       font-size: clamp(38px, 6.6vw, 78px); line-height: 1.18; font-weight: 300; letter-spacing: -.02em;
-      padding: 0 .16em; margin-left: -.16em; transition: background-color .18s, color .18s;
+      padding: 0 .16em; margin-right: -.16em; transition: background-color .18s, color .18s;
     }
     .overlay nav a:hover { color: var(--accent); }
     .overlay nav a.current { background: var(--ink); color: var(--bg); }
