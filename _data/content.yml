@@ -4,13 +4,13 @@
 # Changes go live about a minute after you save.
 
 # ---- Browser tab, Google and link previews ----
-page_title: "Alejandro Vega — Composer, Sound Designer, Creative Coder"
-share_title: "Alejandro Vega — Sound Designer"
-description: "Sonic identities for brands, generative soundscapes, and film scores. Based in Munich."
+page_title: "Alejandro Vega — Music Producer, Mixer, Sound Designer & Creative Coder"
+share_title: "Alejandro Vega — Music Producer & Sound Designer"
+description: "Sonic identities for brands, UX/UI Sounds, Soundscapes and Mixes. Based in Munich."
 
 # ---- Top of the page ----
-headline: "Sonic identities for brands, generative soundscapes, and film scores."
-reel_label: "composer reel"
+headline: "Sonic identities for brands, UX/UI Sounds, Soundscapes and Mixes."
+reel_label: "music producer reel"
 reel_audio: "/assets/reel.mp3"
 clients:
   - "Elica"
@@ -20,18 +20,18 @@ clients:
   - "Philadelphia"
 
 # ---- Menu ----
-menu_note: "Composer and sound designer in Munich. Sonic identity, interaction sound and score."
+menu_note: "Music producer and sound designer in Munich. Sonic identity, interaction sound and bespoke tracks."
 
 # ---- About ----
-about_lead: "Ten-plus years turning client briefs into interactive audio and haptic experiences."
+about_lead: "Ten-plus years of music production and sound design experience, from turning client briefs into interactive audio and haptic experiences, to album mixes, sample pack making and creative coding."
 about:
   - "I work alongside creative teams, research where an experience actually breaks down for users, and turn those findings into both better sound design and the strategy around a release; a client advisor rather than an executor of briefs."
-  - "Currently designing UX/UI sound and haptic feedback at amp Sound Branding in Munich, and running the nu.wav label."
+  - "Currently designing bespoke tracks, UX/UI sounds and haptic feedback, soundscapes and sonic logos at amp Sound Branding in Munich, and running the nu.wav label."
 
 # ---- Disciplines ----
 disciplines:
   - name: "Sonic branding"
-    description: "Sonic logos, brand themes and the soundscapes that carry them."
+    description: "Sonic logos, UX/UI Sounds, Bespoke tracks and the soundscapes that carry them."
     loop: "/assets/loops/branding.mp3"
   - name: "UX/UI sound & haptics"
     description: "Interaction sound and haptic feedback, designed from where users actually struggle."
