@@ -382,7 +382,7 @@
   <script>window.SITE = JSON.parse(document.getElementById('site-data').textContent);</script>
   {% raw %}
   <script>
-    // lets the ambient bed duck out of the way whenever a real clip is playing
+    // lets the ambient sound duck out of the way whenever a real clip is playing
     var videoOn = false;   // while a video is open the ambient stays silent, whatever the player does
     function avAudio(state) {
       if (videoOn && state !== 'video-end') state = 'video';
@@ -732,7 +732,7 @@
 
     /* ------------------------------------------------------------------
        ambient: a generative field-recording texture, synthesized live.
-       No audio files, no libraries — pink noise beds, granular shimmer and
+       No audio files, no libraries — pink noise grains, granular crackle and
        high-Q resonant pings, all built in the Web Audio API.
 
        Off by default (browsers block autoplay anyway). The hero knobs are real:
@@ -746,17 +746,16 @@
       if (!AC) { btn.hidden = true; return; }
 
       var RESUME_ON_RETURN = true;  // set false to always start silent, even for returning visitors
-      var MASTER = 0.2;             // overall level — deliberately low
-      var BED_LEVEL = 0;            // the continuous noise underlayer — muted; the grains and dust carry the texture
+      var MASTER = 0.32;            // overall level
       var DUST_LEVEL = 1;           // density/presence of the granular crackle
-      var TEX_LEVEL = 1;            // level of the whole textural side (grains, dust, pings) — raise if it feels thin without the bed
+      var TEX_LEVEL = 1;            // level of the whole textural side (grains, dust, pings)
 
       var DRIVE_MAX = 34;           // how hard WARMTH can push the saturator
       var SHAPE_K = 2.6;            // curvature of the tanh
       var SHAPE_GAIN = SHAPE_K / Math.tanh(SHAPE_K);  // its small-signal gain, compensated out below
       var MAKEUP = 3.2;             // level the saturator gives back after squashing peaks
 
-      var ctx, master, wet, bed, bedGain, bedBus, texBus, grooveBus, noise, white;
+      var ctx, master, wet, texBus, grooveBus, noise, white;
       var preGain, postGain;        // the WARMTH drive stage
 
       /* GROOVE is an arrangement control: turn it up and elements arrive in order,
@@ -776,8 +775,13 @@
       var on = false, grainT = null, pingT = null, dustT = null, ticker = null;
       var scrollAmt = 0, duck = 1;
 
+      var knobEls = {};
+      ['warmth', 'chaos', 'groove'].forEach(function (name) {
+        knobEls[name] = document.querySelector('[data-knob="' + name + '"]');
+      });
+
       function knob(name) {
-        var el = document.querySelector('[data-knob="' + name + '"]');
+        var el = knobEls[name];
         if (!el) return 0.5;
         var v = parseFloat(el.style.getPropertyValue('--val'));
         return isFinite(v) ? Math.min(1, Math.max(0, v)) : 0.5;
@@ -804,7 +808,7 @@
       }
 
       // white noise — pink has almost no energy up at 3-6 kHz, so the brushed
-      // pulse hits need their own flat source or they vanish under the bed
+      // dust and glitch hits need their own flat source or they come out dull
       function whiteBuffer(sec) {
         var len = Math.floor(ctx.sampleRate * sec);
         var buf = ctx.createBuffer(1, len, ctx.sampleRate);
@@ -851,58 +855,22 @@
 
         var conv = ctx.createConvolver();
         conv.buffer = ir(3.4, 2.4);
-        var verbOut = ctx.createGain();
-        verbOut.gain.value = 0.7;
         wet = ctx.createGain();
-        wet.gain.value = 0.6;
-        wet.connect(conv); conv.connect(verbOut); verbOut.connect(preGain);
+        wet.gain.value = 0.42;
+        wet.connect(conv); conv.connect(preGain);
 
         // texture and rhythm both run at fixed level now; the knobs shape them, not balance them
         texBus = ctx.createGain(); texBus.gain.value = TEX_LEVEL;
         texBus.connect(preGain); texBus.connect(wet);
         grooveBus = ctx.createGain(); grooveBus.gain.value = 1;
         grooveBus.connect(preGain);
-
-        // the sustained layers sit behind their own bus so the groove can duck them
-        bedBus = ctx.createGain(); bedBus.gain.value = BED_LEVEL;
-        bedBus.connect(texBus);
-
-        // bed: slowly drifting band of noise — the "room" everything sits in
-        var src = ctx.createBufferSource();
-        src.buffer = noise; src.loop = true;
-        bed = ctx.createBiquadFilter();
-        bed.type = 'bandpass'; bed.frequency.value = 420; bed.Q.value = 0.9;
-        bedGain = ctx.createGain(); bedGain.gain.value = 0.5;
-        src.connect(bed); bed.connect(bedGain);
-        bedGain.connect(bedBus);
-        src.start();
-
-        // two slow LFOs sum into the filter frequency so it never settles
-        [[0.013, 170], [0.031, 80]].forEach(function (p) {
-          var lfo = ctx.createOscillator(); lfo.frequency.value = p[0];
-          var amt = ctx.createGain(); amt.gain.value = p[1];
-          lfo.connect(amt); amt.connect(bed.frequency); lfo.start();
-        });
-
-        // a darker layer underneath for body
-        var sub = ctx.createBufferSource();
-        sub.buffer = noise; sub.loop = true; sub.playbackRate.value = 0.6;
-        var lp = ctx.createBiquadFilter();
-        lp.type = 'lowpass'; lp.frequency.value = 190; lp.Q.value = 0.7;
-        var subGain = ctx.createGain(); subGain.gain.value = 0.55;
-        sub.connect(lp); lp.connect(subGain); subGain.connect(bedBus);
-        sub.start();
       }
 
       // texture voices land on texBus, which already feeds the reverb
       function out(node, spread) {
-        var pan = ctx.createStereoPanner ? ctx.createStereoPanner() : null;
-        if (pan) {
-          pan.pan.value = (Math.random() * 2 - 1) * spread;
-          node.connect(pan); pan.connect(texBus);
-        } else {
-          node.connect(texBus);
-        }
+        var pan = ctx.createStereoPanner();
+        pan.pan.value = (Math.random() * 2 - 1) * spread;
+        node.connect(pan); pan.connect(texBus);
       }
 
       // grains: short windowed slices of noise, scattered across the stereo field
@@ -928,7 +896,7 @@
         s.start(t, Math.random() * (noise.duration - 1), dur + 0.05);
         s.stop(t + dur + 0.1);
 
-        // GROOVE pulls the spacing toward a loose pulse; CHAOS packs them closer
+        // GROOVE pulls the spacing toward a loose pulse
         var base = 0.45;
         var jitter = (1 - groove) * base * 1.5;
         grainT = setTimeout(grain, Math.max(80, (base + Math.random() * jitter) * 1000));
@@ -936,7 +904,7 @@
 
       /* dust: the grainy layer. Sparse, very short impulses (2-15 ms) rather than
          a continuous band — this is what makes the texture read as granular
-         crackle instead of flat hiss. CHAOS sets the density. */
+         crackle instead of flat hiss. */
       function dust() {
         var t = ctx.currentTime;
         var n = 1 + Math.floor(Math.random() * 3);
@@ -963,16 +931,6 @@
 
         var gap = 0.06;   // steady granular density
         dustT = setTimeout(dust, Math.max(35, (gap * 0.5 + Math.random() * gap) * 1000));
-      }
-
-      /* sidechain: the continuous bed breathes around the groove. Fast duck,
-         slow exponential recovery — deeper and slower as GROOVE opens up. */
-      function sidechain(at, groove) {
-        if (!bedBus) return;
-        var depth = Math.min(0.8, (0.3 + groove * 0.45) * layers().kick);
-        var release = 0.4 + groove * 0.55;
-        bedBus.gain.setTargetAtTime(BED_LEVEL * (1 - depth), at, 0.015);
-        bedBus.gain.setTargetAtTime(BED_LEVEL, at + 0.07, release);
       }
 
       // pings: noise through a very narrow resonant band — struck-object tones
@@ -1032,8 +990,8 @@
         car.connect(g);
 
         if (send > 0) { var s = ctx.createGain(); s.gain.value = send; g.connect(s); s.connect(wet); }
-        var pn = ctx.createStereoPanner ? ctx.createStereoPanner() : null;
-        if (pn) { pn.pan.value = pan; g.connect(pn); pn.connect(grooveBus); } else { g.connect(grooveBus); }
+        var pn = ctx.createStereoPanner();
+        pn.pan.value = pan; g.connect(pn); pn.connect(grooveBus);
 
         mod.start(at); car.start(at);
         mod.stop(at + dur + 0.02); car.stop(at + dur + 0.02);
@@ -1050,8 +1008,8 @@
         g.gain.setValueAtTime(amp, at);
         g.gain.exponentialRampToValueAtTime(0.0001, at + dur);
         s.connect(hp); hp.connect(g);
-        var pn = ctx.createStereoPanner ? ctx.createStereoPanner() : null;
-        if (pn) { pn.pan.value = (Math.random() * 2 - 1) * 0.9; g.connect(pn); pn.connect(grooveBus); } else { g.connect(grooveBus); }
+        var pn = ctx.createStereoPanner();
+        pn.pan.value = (Math.random() * 2 - 1) * 0.9; g.connect(pn); pn.connect(grooveBus);
         s.start(at, Math.random() * (white.duration - 0.2), dur + 0.01);
         s.stop(at + dur + 0.03);
       }
@@ -1061,7 +1019,7 @@
          deterministic — every step that has a weight fires, every time. As CHAOS
          rises it starts skipping written hits, adding unwritten ones off the grid
          positions, ratcheting, detuning and dropping whole steps out. */
-      function step(t, i, groove, stepDur) {
+      function step(t, i, stepDur) {
         var L = layers(), c = knob('chaos');
 
         /* Every step gets a firing probability that blends the written weight
@@ -1072,8 +1030,6 @@
         function pStep(w) { return (1 - c) * w + c * 0.38; }
         // whole-step dropouts, CHAOS's own artefact
         if (c > 0.5 && Math.random() < (c - 0.5) * 0.14) return;
-
-        if (SUB[i] && L.kick > 0) sidechain(t, groove);
 
         if (L.kick > 0 && Math.random() < pStep(SUB[i]) * (SUB[i] ? 1 : 0.35)) {
           fmVoice(t, 46 + Math.random() * 12 * (1 + c), 1, 0.5 + c * 0.6,
@@ -1124,7 +1080,7 @@
       function pulse() {
         var groove = knob('groove'), stepDur = 60 / BPM / 4;
         while (nextStep < ctx.currentTime + LOOKAHEAD) {
-          if (groove > 0.06) step(nextStep, stepIx, groove, stepDur);
+          if (groove > 0.06) step(nextStep, stepIx, stepDur);
           stepIx = (stepIx + 1) % STEPS;
           nextStep += stepDur;
         }
@@ -1135,14 +1091,11 @@
       function tick() {
         if (!ctx || !on) return;
         var warmth = knob('warmth'), t = ctx.currentTime;
-        bed.frequency.setTargetAtTime(600 + scrollAmt * 750, t, 0.25);
-        bedGain.gain.setTargetAtTime(0.34 + (1 - scrollAmt) * 0.3, t, 0.9);
         // WARMTH: push harder into the tanh and pull the level back out again
         var drv = 1 + warmth * DRIVE_MAX;
         preGain.gain.setTargetAtTime(drv, t, 0.12);
         // undo both the drive and the curve's own gain, then add makeup for the squashed peaks
         postGain.gain.setTargetAtTime((1 + warmth * MAKEUP) / (drv * SHAPE_GAIN), t, 0.12);
-        if (knob('groove') <= 0.06 && bedBus) bedBus.gain.setTargetAtTime(BED_LEVEL, t, 0.4);
         master.gain.setTargetAtTime(MASTER * duck, t, 0.5);
       }
 
@@ -1154,23 +1107,34 @@
         btn.setAttribute('aria-label', 'Turn ambient sound off');
         master.gain.cancelScheduledValues(ctx.currentTime);
         master.gain.setTargetAtTime(MASTER * duck, ctx.currentTime, 1.4);
+        if (!document.hidden) startVoices();
+        try { localStorage.setItem('ambient', 'on'); } catch (e) {}
+      }
+
+      /* The voice timers only run while the tab is visible. A suspended context
+         freezes currentTime, so anything scheduled while hidden would pile up
+         and fire all at once on return. */
+      function startVoices() {
         if (!grainT) grain();
         if (!pingT) ping();
         if (!dustT) dust();
         if (!pulseT) { nextStep = ctx.currentTime + 0.12; stepIx = 0; pulse(); }
         if (!ticker) ticker = setInterval(tick, 125);
-        try { localStorage.setItem('ambient', 'on'); } catch (e) {}
+      }
+
+      function stopVoices() {
+        clearTimeout(grainT); grainT = null;
+        clearTimeout(pingT); pingT = null;
+        clearTimeout(dustT); dustT = null;
+        clearTimeout(pulseT); pulseT = null;
+        clearInterval(ticker); ticker = null;
       }
 
       function stop() {
         on = false;
         btn.setAttribute('aria-pressed', 'false');
         btn.setAttribute('aria-label', 'Turn ambient sound on');
-        clearTimeout(grainT); grainT = null;
-        clearTimeout(pingT); pingT = null;
-        clearTimeout(dustT); dustT = null;
-        clearTimeout(pulseT); pulseT = null;
-        clearInterval(ticker); ticker = null;
+        stopVoices();
         if (ctx) {
           master.gain.cancelScheduledValues(ctx.currentTime);
           master.gain.setTargetAtTime(0, ctx.currentTime, 0.45);
@@ -1212,8 +1176,13 @@
       // never run in a background tab
       document.addEventListener('visibilitychange', function () {
         if (!ctx) return;
-        if (document.hidden) { if (ctx.state === 'running') ctx.suspend(); }
-        else if (on && ctx.state === 'suspended') ctx.resume();
+        if (document.hidden) {
+          stopVoices();
+          if (ctx.state === 'running') ctx.suspend();
+        } else if (on) {
+          if (ctx.state === 'suspended') ctx.resume();
+          startVoices();
+        }
       });
 
       // a returning visitor who left it on gets it back on their first interaction
