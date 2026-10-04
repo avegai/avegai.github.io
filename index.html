@@ -378,7 +378,8 @@
     </div>
   </section>
 
-  <script>window.SITE = {{ c | jsonify }};</script>
+  <script type="application/json" id="site-data">{{ c | jsonify }}</script>
+  <script>window.SITE = JSON.parse(document.getElementById('site-data').textContent);</script>
   {% raw %}
   <script>
     // lets the ambient bed duck out of the way whenever a real clip is playing
